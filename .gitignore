@@ -1,0 +1,52 @@
+# ── Python ──────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv/
+
+# ── Django ──────────────────────────────────────────
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media/
+
+# ── Environment ─────────────────────────────────────
+.env
+.env.local
+.env.production
+*.env
+
+# ── Node / React ────────────────────────────────────
+node_modules/
+dist/
+build/
+.DS_Store
+*.local
+
+# ── Vite ────────────────────────────────────────────
+dist-ssr/
+*.map
+
+# ── IDE ─────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ── OS ──────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Static ──────────────────────────────────────────
+staticfiles/
+static/
+
+# ── Migrations (optional — keep if team project) ────
+# api/migrations/
