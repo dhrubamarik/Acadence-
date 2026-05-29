@@ -282,7 +282,7 @@ Gmail App Password → myaccount.google.com/apppasswords
 ### Step 1 — Clone the Repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/acadence.git
+git clone https://github.com/dhrubamarik/Acadence-
 cd acadence
 ```
 
