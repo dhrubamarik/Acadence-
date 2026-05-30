@@ -263,158 +263,53 @@ acadence/
 └──────────────────────────────────────────────────────────────┘
 ```
 
----
-
 ## Installation
 
 ### Prerequisites
-```
-Node.js >= 18.x
-Python >= 3.10
-pip
-Git
-Groq API Key    → free at console.groq.com
-Gmail App Password → myaccount.google.com/apppasswords
-```
+* **Node.js:** >= 18.x
+* **Python:** >= 3.10
+* **pip** & **Git**
+
+**Accounts Needed:**
+* **Groq API Key:** Free at [console.groq.com](https://console.groq.com)
+* **Gmail App Password:** Generate at [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords)
 
 ---
 
-### Step 1 — Clone the Repository
+### Step 1 — Environment Variables
 
-```bash
-git clone https://github.com/dhrubamarik/Acadence-
-cd acadence
-```
+Create a `.env` file in the root directory and add your credentials.
 
----
+**1. Get Groq API key:**
+1. Go to console.groq.com and sign up for free.
+2. Navigate to **API Keys** → **Create new key**.
+3. Paste the key into your `.env` file.
 
-### Step 2 — Backend Setup
-
-```bash
-cd backend
-
-# Create virtual environment
-python -m venv venv
-
-# Activate
-# Windows:
-venv\Scripts\activate
-# Mac/Linux:
-source venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
-```
+**2. Get Gmail App Password:**
+1. **Enable 2-Step Verification:** Go to your Google Account Security tab. Under "How you sign in to Google," ensure 2-Step Verification is ON.
+2. **Generate Password:** In the Security tab search bar, type "App passwords". 
+3. Under "Select app", choose **Mail**.
+4. Under "Select device", choose **Other (Custom name)** and type "App Auth".
+5. Click **Generate**. Copy the 16-character password into your `.env` file. *(Note: Never share this password or commit your .env file!)*
 
 ---
 
-### Step 3 — Create Environment File
+### Step 2 — Setup
+Double-click on the `Setup.bat` file to install all dependencies.(WINDOWS)
+or
+Double-click on the `Setup.sh` file to install all dependencies.(MACOS)
 
-Create `.env` inside `/backend`:
+### Step 3 — Run
+Double-click on the `Run.bat` file to launch the application.(WINDOWS)
+or
+Double-click on the `Run.bat` file to launch the application.(MACOS)
 
-```env
-GROQ_API_KEY=your_groq_api_key_here
-EMAIL_HOST_USER=your.email@gmail.com
-EMAIL_HOST_PASSWORD=your_gmail_app_password
-PROFESSOR_EMAIL=professor.secondary@gmail.com
-DEBUG=True
-```
-
-**Get Groq API key:**
-```
-1. Go to console.groq.com
-2. Sign up free
-3. API Keys → Create new key
-4. Paste into .env
-```
-
-**Get Gmail App Password:**
-```
-1. Go to myaccount.google.com
-2. Security → 2-Step Verification → App Passwords
-3. Create → Copy 16-digit password
-4. Paste into EMAIL_HOST_PASSWORD
-```
-
----
-
-### Step 4 — Run Migrations
-
-```bash
-python manage.py makemigrations
-python manage.py migrate
-```
-
----
-
-### Step 5 — Create Demo Departments
-
-```bash
-python manage.py shell
-```
-
-```python
-from api.models import Department
-
-Department.objects.create(
-    name="Computer Science & Engineering",
-    code="CSSE12",
-    join_key="csse12key"
-)
-Department.objects.create(
-    name="Mechanical Engineering",
-    code="MECH08",
-    join_key="mech08key"
-)
-Department.objects.create(
-    name="Business Administration",
-    code="BBA15",
-    join_key="bba15key"
-)
-exit()
-```
-
----
-
-### Step 6 — Start Backend
-
-```bash
-python manage.py runserver
-```
-
-```
-✅ Django running at: http://127.0.0.1:8000
-```
-
----
-
-### Step 7 — Frontend Setup
-
-```bash
-# Open new terminal
-cd frontend
-
-npm install
-npm run dev
-```
-
-```
-✅ React running at: http://localhost:5173
-```
-
----
-
-### Step 8 — Open the App
-
-```
-1. Go to http://localhost:5173
-2. Watch cinematic intro (4 seconds)
-3. Click "Get Started Free" on landing page
-4. Register with department code: CSSE12
-5. Verify email OTP
-6. Start adding tasks!
-```
-
+### Step 4 — Open the App
+1. Watch the cinematic intro (4 seconds).
+2. Click **Get Started Free** on the landing page.
+3. Register using the department code: **CSSE12**.
+4. Verify your email via OTP.
+5. Start adding tasks!
 ---
 
 ## Sample Tasks to Test
