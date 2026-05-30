@@ -22,7 +22,7 @@ def get_tokens_for_user(user):
 
 # ── Helper: Send Beautiful OTP Email ──────────────────────
 def send_otp_email(user_email, otp):
-    subject = "🎓 AuraPlan - Verify Your Email"
+    subject = "🎓 Acadence - Verify Your Email"
 
     html_message = f"""
     <div style="font-family: Inter, Arial, sans-serif; 
@@ -37,7 +37,7 @@ def send_otp_email(user_email, otp):
             <h1 style="color: #6366f1; 
                        font-size: 28px; 
                        margin: 0;">
-                🎓 AuraPlan
+                🎓 Acadence
             </h1>
             <p style="color: #9ca3af; 
                       margin: 4px 0 0; 
@@ -59,7 +59,7 @@ def send_otp_email(user_email, otp):
             <p style="color: #6b7280; 
                       margin: 0 0 24px; 
                       font-size: 14px;">
-                Use this OTP to complete your AuraPlan registration.
+                Use this OTP to complete your Acadence registration.
             </p>
 
             <!-- OTP Box -->
@@ -107,13 +107,13 @@ def send_otp_email(user_email, otp):
                   color: #d1d5db; 
                   font-size: 12px; 
                   margin-top: 20px;">
-            If you didn't register on AuraPlan, ignore this email.
+            If you didn't register on Acadence, ignore this email.
         </p>
     </div>
     """
 
     plain_message = (
-        f"Your AuraPlan OTP is: {otp}\n\n"
+        f"Your Acadence OTP is: {otp}\n\n"
         f"Valid for 10 minutes.\n"
         f"Never share this with anyone."
     )

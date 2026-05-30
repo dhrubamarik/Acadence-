@@ -12,7 +12,7 @@ class CustomUserAdmin(UserAdmin):
     
     # Add department and is_verified to admin form
     fieldsets = UserAdmin.fieldsets + (
-        ('AuraPlan', {
+        ('Acadence', {
             'fields': ('department', 'is_verified', 'otp')
         }),
     )

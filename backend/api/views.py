@@ -426,7 +426,7 @@ def general_roadmap(request):
     today = datetime.now().strftime("%Y-%m-%d")
 
     prompt = f"""
-You are AuraPlan, an expert academic coach for college students.
+You are Acadence, an expert academic coach for college students.
 Today's date is {today}.
 
 The student has these upcoming tasks:
@@ -516,7 +516,7 @@ Still be specific with task names.
 """
 
     prompt = f"""
-You are AuraPlan, an elite academic coach who creates HIGHLY SPECIFIC study plans.
+You are Acadence, an elite academic coach who creates HIGHLY SPECIFIC study plans.
 
 Today's date is: {today}
 
