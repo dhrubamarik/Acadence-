@@ -1,40 +1,23 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-echo =====================================
-echo   Acadence - START SERVERS
-echo =====================================
+echo ============================================
+echo   ACADENCE - START SERVERS
+echo ============================================
 echo.
 
-:: Resolve paths from this script's folder so it works when double-clicked.
-set "REPO_DIR=%~dp0"
-set "BACKEND_DIR=%REPO_DIR%backend"
-set "FRONTEND_DIR=%REPO_DIR%frontend"
-
-if not exist "%BACKEND_DIR%" (
-    echo ERROR: Backend folder not found at "%BACKEND_DIR%".
-    echo Make sure Run.bat is inside the Acadence project folder.
-    pause & exit /b 1
-)
-
-if not exist "%FRONTEND_DIR%" (
-    echo ERROR: Frontend folder not found at "%FRONTEND_DIR%".
-    echo Make sure Run.bat is inside the Acadence project folder.
-    pause & exit /b 1
-)
-
-:: -- Start Backend ------------------------
-echo [1/2] Starting Django Backend...
-start "Acadence - Backend" cmd /k "cd /d ""%BACKEND_DIR%"" && call venv\Scripts\activate && python manage.py runserver"
+:: ── Start Backend ────────────────────────────
+echo [1/2] Starting Django backend...
+start "Acadence - Backend" cmd /k "cd /d %~dp0backend && call venv\Scripts\activate && python manage.py runserver"
 echo   Backend starting at: http://127.0.0.1:8000
 echo.
 
-::Brief pause so backend gets a head start
+:: Brief pause so backend gets a head start
 timeout /t 3 /nobreak >nul
 
-:: -- Start Frontend ------------------------
+:: ── Start Frontend ───────────────────────────
 echo [2/2] Starting React frontend...
-start "Acadence - Frontend" cmd /k "cd /d ""%FRONTEND_DIR%"" && npm run dev"
+start "Acadence - Frontend" cmd /k "cd /d %~dp0frontend && npm run dev"
 echo   Frontend starting at: http://localhost:5173
 echo.
 
@@ -43,13 +26,13 @@ echo Waiting for servers to be ready...
 timeout /t 5 /nobreak >nul
 start "" http://localhost:5173
 
-echo =======================================
-echo Both servers are running:
-echo =======================================
+echo ============================================
+echo   Both servers are running!
+echo ============================================
 echo.
-echo Backend  : http://127.0.0.1:8000
-echo Frontend : http://localhost:5173
+echo   Backend  : http://127.0.0.1:8000
+echo   Frontend : http://localhost:5173
 echo.
-echo Close the two server windows to stop the app.
-echo =======================================
+echo   Close the two server windows to stop the app.
+echo ============================================
 pause
