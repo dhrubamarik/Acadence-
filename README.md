@@ -24,7 +24,7 @@ Acadence is a full-stack AI-powered academic stress intelligence platform built 
 
 No more scattered deadlines across PDFs, emails and WhatsApp groups.  
 No more discovering crunch weeks at midnight.  
-Just upload your syllabus — Acadence handles the rest.
+Just upload your syllabus — Let Acadence handles the rest.
 
 > Upload syllabus PDF → **Groq AI extracts all deadlines in 10 seconds**  
 > Complete tasks → **ML engine learns YOUR work patterns**  
