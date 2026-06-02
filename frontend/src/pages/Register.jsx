@@ -120,7 +120,7 @@ function Register() {
             </div>
 
             {[
-              { label: "Password",         name: "password",        placeholder: "Min 6 characters" },
+              { label: "Password",         name: "password",        placeholder: "Min 6 characters & Max 12 characters" },
               { label: "Confirm password", name: "confirmPassword", placeholder: "Repeat password" },
             ].map(f => (
               <div key={f.name} style={{ marginBottom: "16px" }}>

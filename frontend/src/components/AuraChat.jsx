@@ -199,7 +199,7 @@ const SUGGESTIONS = [
 function AuraChat() {
   const [messages, setMessages] = useState([{
     role: "assistant", type: "text",
-    content: "Hi! I'm **Aura** 👋 Your AI academic coach.\n\nI can help you with:\n• 📅 **Plan all my tasks** — full semester roadmap\n• 📖 **Exam prep** — e.g. *help me prepare for Math*\n• ⚡ **Clash detection** — *what clashes do I have?*\n• 🔥 **Stress forecast** — *which days are most stressful?*",
+    content: "Hi! I'm **Acadence-AI** 👋 Your AI academic coach.\n\nI can help you with:\n• 📅 **Plan all my tasks** — Full semester roadmap\n• 📖 **Exam prep** — e.g. *help me prepare for Math*\n• ⚡ **Clash detection** — *what clashes do I have?*\n• 🔥 **Stress forecast** — *which days are most stressful?*",
   }])
   const [input,   setInput]   = useState("")
   const [loading, setLoading] = useState(false)
@@ -223,7 +223,7 @@ function AuraChat() {
     try {
       if (intent === INTENT.GREETING) {
         removeLoading()
-        addMessage("assistant", "Hi! 👋 I'm Aura, your AI academic coach.\n\nI can help you with:\n• 📅 **'plan all my tasks'** — full semester roadmap\n• 📖 **'help me prepare for Math exam'** — exam prep\n• 📝 **Paste your syllabus** — topic-wise study plan\n• ⚡ **'what clashes do I have?'** — conflict check\n• 🔥 **'which days are most stressful?'** — stress map")
+        addMessage("assistant", "Hi! 👋 I'm Acadence-AI, your AI academic coach.\n\nI can help you with:\n• 📅 **'plan all my tasks'** — full semester roadmap\n• 📖 **'help me prepare for Math exam'** — exam prep\n• 📝 **Paste your syllabus** — topic-wise study plan\n• ⚡ **'what clashes do I have?'** — conflict check\n• 🔥 **'which days are most stressful?'** — stress map")
       } else if (intent === INTENT.SHOW_CLASHES) {
         const res = await API.get("analytics/"); removeLoading()
         const clashes = res.data.clashes || []
@@ -299,7 +299,7 @@ function AuraChat() {
           }}>
             <div style={{ width: "38px", height: "38px", borderRadius: "50%", background: "linear-gradient(135deg, #0d9488, #06b6d4)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "18px", boxShadow: "0 2px 8px rgba(13,148,136,0.4)" }}>🤖</div>
             <div>
-              <div style={{ fontFamily: "'Lora', serif", fontSize: "16px", fontWeight: 600, color: "#5eead4", letterSpacing: "-0.2px" }}>Aura AI Coach</div>
+              <div style={{ fontFamily: "'Lora', serif", fontSize: "16px", fontWeight: 600, color: "#5eead4", letterSpacing: "-0.2px" }}>Acadence-AI Coach</div>
               <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)" }}>Ask me to plan, prep, or detect clashes</div>
             </div>
             <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: "6px" }}>

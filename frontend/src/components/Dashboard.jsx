@@ -367,28 +367,28 @@ function Dashboard({ tasks, analytics }) {
   const stats = [
     {
       icon: "📋", label: "TOTAL TASKS", value: tasks.length,
-      sub: "this semester",
+      sub: "This semester",
       gradient: "linear-gradient(135deg, #f0fdfa 0%, #e0faf6 100%)",
       iconGrad: "linear-gradient(135deg, #0d9488, #14b8a6)",
       valColor: "#0d7a7a", border: "rgba(13,148,136,0.2)", glow: "rgba(13,148,136,0.1)",
     },
     {
       icon: "🔥", label: "PEAK STRESS", value: peakStress,
-      sub: "max stress score",
+      sub: "Max stress score",
       gradient: "linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)",
       iconGrad: "linear-gradient(135deg, #f97316, #fb923c)",
       valColor: "#ea580c", border: "rgba(249,115,22,0.2)", glow: "rgba(249,115,22,0.1)",
     },
     {
       icon: "📅", label: "THIS WEEK", value: thisWeekCount,
-      sub: "deadlines due",
+      sub: "Deadlines due",
       gradient: "linear-gradient(135deg, #f0fdfa 0%, #d1faf4 100%)",
       iconGrad: "linear-gradient(135deg, #06b6d4, #0891b2)",
       valColor: "#0891b2", border: "rgba(6,182,212,0.2)", glow: "rgba(6,182,212,0.1)",
     },
     {
       icon: "⚡", label: "CLASHES", value: analytics.clashes?.length || 0,
-      sub: "schedule conflicts",
+      sub: "Schedule conflicts",
       gradient: "linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%)",
       iconGrad: "linear-gradient(135deg, #7c3aed, #9333ea)",
       valColor: "#7c3aed", border: "rgba(124,58,237,0.2)", glow: "rgba(124,58,237,0.1)",

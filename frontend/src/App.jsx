@@ -27,7 +27,7 @@ const NAV_ITEMS = [
   { id: "stress", icon: "🌡️", label: "Stress Map" },
   { id: "clashes", icon: "⚡", label: "Clashes" },
   { id: "department", icon: "🏫", label: "Department" },
-  { id: "alerts", icon: "🚨", label: "Prof Alerts" },
+  { id: "alerts", icon: "🚨", label: "Professor Alerts" },
   { id: "files", icon: "📁", label: "Dept Files" },
 
 ]

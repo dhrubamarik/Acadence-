@@ -500,7 +500,7 @@ const LandingPage = () => {
                     </div>
 
                     {/* Stats Row */}
-                    <div style={{
+                    {/* <div style={{
                         display: "flex",
                         gap: "2.5rem",
                         opacity: loaded ? 1 : 0,
@@ -533,7 +533,7 @@ const LandingPage = () => {
                                 </div>
                             </div>
                         ))}
-                    </div>
+                    </div> */}
                 </div>
 
                 {/* ── RIGHT PANEL — Canvas ── */}
@@ -552,7 +552,7 @@ const LandingPage = () => {
                     }} />
 
                     {/* Interact hint */}
-                    <div style={{
+                    {/* <div style={{
                         position: "absolute", bottom: "2.5rem", left: "50%",
                         transform: "translateX(-50%)",
                         padding: "0.5rem 1.2rem",
@@ -569,7 +569,7 @@ const LandingPage = () => {
                         transition: "opacity 1s ease 1s"
                     }}>
                         Move cursor to interact
-                    </div>
+                    </div> */}
                 </div>
             </section>
 
@@ -1247,7 +1247,7 @@ const LandingPage = () => {
                     color: "#4db8b8",
                     fontSize: "0.8rem"
                 }}>
-                    Built with 🤖 Groq AI · Django · React
+                    Built with Groq AI · Django · React
                 </div>
 
                 <div style={{
