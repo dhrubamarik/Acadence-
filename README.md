@@ -293,18 +293,22 @@ Create a `.env` file in the root directory and add your credentials.
 5. Click **Generate**. Copy the 16-character password into your `.env` file. *(Note: Never share this password or commit your .env file!)*
 
 ---
+## Step 2 — Clone the Repository
 
-### Step 2 — Setup
+git clone https://github.com/dhrubamarik/Acadence-
+cd acadence
+
+## Step 3 — Setup
 Double-click on the `Setup.bat` file to install all dependencies.(WINDOWS)
 or
 Double-click on the `Setup.sh` file to install all dependencies.(MACOS)
 
-### Step 3 — Run
+## Step 4 — Run
 Double-click on the `Run.bat` file to launch the application.(WINDOWS)
 or
 Double-click on the `Run.bat` file to launch the application.(MACOS)
 
-### Step 4 — Open the App
+## Step 5 — Open the App
 1. Watch the cinematic intro (4 seconds).
 2. Click **Get Started Free** on the landing page.
 3. Register using the department code: **CSSE12**.
