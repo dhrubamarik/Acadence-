@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from './context/AuthContext'
 import API from './api'
-import { PanelLeft } from "lucide-react"
+import { PanelLeft,LogOut } from "lucide-react"
 
 import Dashboard from './components/Dashboard'
 import TaskForm from './components/TaskForm'
@@ -361,7 +361,7 @@ function App() {
                 transition: "all 0.15s",
               }}
             >
-              <span>🚪</span>
+              <LogOut size={16}/>
               {sidebarOpen && "Logout"}
             </button>
           </div>
