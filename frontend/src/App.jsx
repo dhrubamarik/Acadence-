@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from './context/AuthContext'
 import API from './api'
+import { PanelLeft } from "lucide-react"
 
 import Dashboard from './components/Dashboard'
 import TaskForm from './components/TaskForm'
@@ -209,7 +210,12 @@ function App() {
                 transition: "all 0.15s",
               }}
             >
-              {sidebarOpen ? "◀" : "▶"}
+              <PanelLeft size={18}
+              style={{
+                transition: "transfrom 0.2s ease",
+                transform: sidebarOpen ? "rotate(0deg)" : "rotate(180deg)",
+              }}
+              />
             </button>
           </div>
 
