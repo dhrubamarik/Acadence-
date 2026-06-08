@@ -404,7 +404,7 @@ function Dashboard({ tasks, analytics }) {
         <div style={{ marginBottom: "32px" }}>
           <h1 style={{
             fontFamily: "'Lora', serif",
-            margin: "0 0 6px", fontSize: "32px", fontWeight: 600,
+            margin: "0 0 6px", fontSize: "45px", fontWeight: 600,
             background: "linear-gradient(135deg, #0d9488, #06b6d4)",
             WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
             backgroundClip: "text", letterSpacing: "-0.5px",
