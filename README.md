@@ -104,7 +104,7 @@ Just upload your syllabus — Let Acadence handles the rest.
 - Click dates to see tasks due
 - Course filter support
 
-### 💬 Aura AI Chat
+### 💬 Acadence AI Chat
 - Chat with Aura for personalized study roadmaps
 - Exam-specific plans built from YOUR syllabus topics
 - General roadmap from all upcoming tasks

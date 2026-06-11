@@ -461,7 +461,7 @@ function Dashboard({ tasks, analytics }) {
                   color: "#0f2a27",
                   fontFamily: "'Lora', serif",
                 }}>
-                  Aura Recommends
+                  Acadence Recommends
                 </h3>
                 <p style={{
                   margin: 0,
