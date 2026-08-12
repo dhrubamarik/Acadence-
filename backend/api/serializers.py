@@ -32,7 +32,7 @@ class UserSerializer(serializers.ModelSerializer):
 # serializers.py - Update RegisterSerializer
 
 class RegisterSerializer(serializers.ModelSerializer):
-    password        = serializers.CharField(write_only=True, min_length=6, max_length=12, required=True)
+    password        = serializers.CharField(write_only=True, min_length=6, max_length=15, required=True)
     department_code = serializers.CharField(write_only=True, required=False, allow_blank=True)
     full_name       = serializers.CharField(required=True)
 

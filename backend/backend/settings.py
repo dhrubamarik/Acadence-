@@ -86,9 +86,16 @@ USE_TZ        = True
 # ── Static files ───────────────────────────────────────────
 STATIC_URL  = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_STORAGE = (
-    'whitenoise.storage.CompressedManifestStaticFilesStorage'
-)
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        # CompressedManifestStaticFilesStorage will throw 500 errors if an asset is missing.
+        # CompressedStaticFilesStorage safely falls back without breaking styles.
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
+    },
+}
 
 # ── Media files ────────────────────────────────────────────
 MEDIA_URL  = '/media/'
