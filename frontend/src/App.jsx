@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from './context/AuthContext'
 import API from './api'
-import { PanelLeft,LogOut } from "lucide-react"
 
 import Dashboard from './components/Dashboard'
 import TaskForm from './components/TaskForm'
@@ -28,9 +27,8 @@ const NAV_ITEMS = [
   { id: "stress", icon: "🌡️", label: "Stress Map" },
   { id: "clashes", icon: "⚡", label: "Clashes" },
   { id: "department", icon: "🏫", label: "Department" },
-  { id: "alerts", icon: "🚨", label: "Professor Alerts" },
-  { id: "files", icon: "📁", label: "Department Files" },
-
+  { id: "alerts", icon: "🚨", label: "Prof Alerts" },
+  { id: "files", icon: "📁", label: "Dept Files" },
 ]
 
 /* ── Design tokens ── */
@@ -234,12 +232,7 @@ function App() {
                 transition: "all 0.15s",
               }}
             >
-              <PanelLeft size={18}
-              style={{
-                transition: "transfrom 0.2s ease",
-                transform: sidebarOpen ? "rotate(0deg)" : "rotate(180deg)",
-              }}
-              />
+              {sidebarOpen ? "◀" : "▶"}
             </button>
           </div>
 
@@ -395,7 +388,7 @@ function App() {
                 transition: "all 0.15s",
               }}
             >
-              <LogOut size={16}/>
+              <span>🚪</span>
               {sidebarOpen && "Logout"}
             </button>
           </div>
@@ -464,38 +457,21 @@ function App() {
               </div>
             )}
 
-            {activePage === "department" && (
-              <div>
-                <PageHeader
-                  icon="🏫"
-                  title="Department Intelligence"
-                  sub="Collective stress data and crowd-sourced task difficulty from your department"
-                />
-                <DepartmentDashboard />
-              </div>
-            )}
+            {/* NOTE: no <PageHeader> here — DepartmentDashboard renders its own
+                header (department name, code, student count), so wrapping it
+                in PageHeader produced a duplicate heading. */}
+            {activePage === "department" && <DepartmentDashboard />}
 
-            {activePage === "alerts" && (
-              <div>
-                <PageHeader
-                  icon="🚨"
-                  title="Professor Alert System"
-                  sub="Raise stress alerts and track department-wide academic pressure"
-                />
-                <ProfessorAlerts />
-              </div>
-            )}
+            {/* NOTE: no <PageHeader> here — ProfessorAlerts renders its own
+                header (department name, code, Raise Stress Alert button),
+                so wrapping it in PageHeader produced a duplicate heading. */}
+            {activePage === "alerts" && <ProfessorAlerts />}
 
-            {activePage === "files" && (
-              <div>
-                <PageHeader
-                  icon="📁"
-                  title="Department Files"
-                  sub="Share assignments, lab copies and notes with your department"
-                />
-                <DepartmentFiles />
-              </div>
-            )}
+            {/* NOTE: no <PageHeader> here — DepartmentFiles renders its own
+                header (dept name, code, file count, upload button), so adding
+                PageHeader on top of it produced a duplicate "Department Files"
+                heading. Just render the component directly. */}
+            {activePage === "files" && <DepartmentFiles />}
 
           </div>
         </div>
