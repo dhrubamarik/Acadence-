@@ -1,5 +1,6 @@
 from pathlib import Path
 import os
+from datetime import timedelta
 from dotenv import load_dotenv
 import dj_database_url
 
@@ -34,7 +35,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # ← ADD
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # ← WhiteNoise static file serving
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -52,7 +53,7 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
-                'django.template.context_processors.request',
+                'django.template.processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
@@ -91,8 +92,6 @@ STORAGES = {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
     },
     "staticfiles": {
-        # CompressedManifestStaticFilesStorage will throw 500 errors if an asset is missing.
-        # CompressedStaticFilesStorage safely falls back without breaking styles.
         "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
     },
 }
@@ -108,7 +107,6 @@ REST_FRAMEWORK = {
     ),
 }
 
-from datetime import timedelta
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME':  timedelta(hours=24),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
@@ -119,11 +117,8 @@ CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-    # ← Add your Vercel URL after deploying frontend
-    # "https://acadence.vercel.app",
     "https://Acadence-frontend.onrender.com",
-     "https://acadence-frontend.onrender.com",
-
+    "https://acadence-frontend.onrender.com",
 ]
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = [
@@ -145,6 +140,7 @@ EMAIL_USE_TLS       = True
 EMAIL_HOST_USER     = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL  = f"Acadence <{os.getenv('EMAIL_HOST_USER')}>"
+EMAIL_TIMEOUT       = 10  # Prevents Gunicorn timeouts if SMTP hangs
 
 # ── Professor Alert ────────────────────────────────────────
 PROFESSOR_EMAIL = os.getenv('PROFESSOR_EMAIL')
