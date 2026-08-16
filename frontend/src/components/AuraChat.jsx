@@ -195,17 +195,52 @@ const SUGGESTIONS = [
   { label: "🔥 Most stressful days",    text: "which days are most stressful?" },
 ]
 
+const STORAGE_KEY = "aura_chat_messages"
+
+const DEFAULT_MESSAGES = [{
+  role: "assistant", type: "text",
+  content: "Hi! I'm **Acadence-AI** 👋 Your AI academic coach.\n\nI can help you with:\n• 📅 **Plan all my tasks** — Full semester roadmap\n• 📖 **Exam prep** — e.g. *help me prepare for Math*\n• ⚡ **Clash detection** — *what clashes do I have?*\n• 🔥 **Stress forecast** — *which days are most stressful?*",
+}]
+
+function loadStoredMessages() {
+  try {
+    const raw = sessionStorage.getItem(STORAGE_KEY)
+    if (!raw) return DEFAULT_MESSAGES
+    const parsed = JSON.parse(raw)
+    return Array.isArray(parsed) && parsed.length > 0 ? parsed : DEFAULT_MESSAGES
+  } catch {
+    return DEFAULT_MESSAGES
+  }
+}
+
 /* ── Main AuraChat ── */
 function AuraChat() {
-  const [messages, setMessages] = useState([{
-    role: "assistant", type: "text",
-    content: "Hi! I'm **Acadence-AI** 👋 Your AI academic coach.\n\nI can help you with:\n• 📅 **Plan all my tasks** — Full semester roadmap\n• 📖 **Exam prep** — e.g. *help me prepare for Math*\n• ⚡ **Clash detection** — *what clashes do I have?*\n• 🔥 **Stress forecast** — *which days are most stressful?*",
-  }])
+  const [messages, setMessages] = useState(loadStoredMessages)
   const [input,   setInput]   = useState("")
   const [loading, setLoading] = useState(false)
   const bottomRef = useRef(null)
+  const scrollContainerRef = useRef(null)
 
-  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }) }, [messages])
+  // FIX: scroll only the internal chat container, never the page.
+  // We manually set scrollTop on the container instead of using
+  // bottomRef.scrollIntoView(), because scrollIntoView() walks up
+  // every scrollable ancestor (including the page) to bring the
+  // target into view, which was causing the whole page to jump/scroll.
+  useEffect(() => {
+    const el = scrollContainerRef.current
+    if (el) {
+      el.scrollTop = el.scrollHeight
+    }
+  }, [messages])
+
+  useEffect(() => {
+    try {
+      const toSave = messages.filter(m => m.type !== "loading")
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(toSave))
+    } catch {
+      // storage unavailable (e.g. private browsing quota) — fail silently
+    }
+  }, [messages])
 
   const addMessage = (role, content, type = "text", data = null) =>
     setMessages(prev => [...prev, { role, content, type, data }])
@@ -289,33 +324,48 @@ function AuraChat() {
           borderRadius: "20px",
           overflow: "hidden",
           boxShadow: "0 4px 24px rgba(13,148,136,0.10)",
+          display: "flex",
+          flexDirection: "column",
+          maxHeight: "calc(100vh - 160px)",
         }}>
           {/* Chat header bar */}
           <div style={{
-            padding: "16px 20px",
+            padding: "10px 16px",
             background: "linear-gradient(135deg, #0f2a27 0%, #0d3d38 100%)",
-            display: "flex", alignItems: "center", gap: "12px",
+            display: "flex", alignItems: "center", gap: "10px",
             borderBottom: "1px solid rgba(255,255,255,0.07)",
+            flexShrink: 0,
           }}>
-            <div style={{ width: "38px", height: "38px", borderRadius: "50%", background: "linear-gradient(135deg, #0d9488, #06b6d4)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "18px", boxShadow: "0 2px 8px rgba(13,148,136,0.4)" }}>🤖</div>
+            <div style={{ width: "30px", height: "30px", borderRadius: "50%", background: "linear-gradient(135deg, #0d9488, #06b6d4)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "14px", boxShadow: "0 2px 8px rgba(13,148,136,0.4)" }}>🤖</div>
             <div>
-              <div style={{ fontFamily: "'Lora', serif", fontSize: "16px", fontWeight: 600, color: "#5eead4", letterSpacing: "-0.2px" }}>Acadence-AI Coach</div>
-              <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)" }}>Ask me to plan, prep, or detect clashes</div>
+              <div style={{ fontFamily: "'Lora', serif", fontSize: "13.5px", fontWeight: 600, color: "#5eead4", letterSpacing: "-0.2px" }}>Acadence-AI Coach</div>
+              <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.4)" }}>Ask me to plan, prep, or detect clashes</div>
             </div>
             <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: "6px" }}>
-              <div style={{ width: "7px", height: "7px", borderRadius: "50%", background: "#5eead4", boxShadow: "0 0 6px #5eead4" }} />
-              <span style={{ fontSize: "11px", color: "#5eead4", fontWeight: "600" }}>Online</span>
+              <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#5eead4", boxShadow: "0 0 6px #5eead4" }} />
+              <span style={{ fontSize: "10px", color: "#5eead4", fontWeight: "600" }}>Online</span>
             </div>
           </div>
 
-          {/* Messages */}
-          <div style={{ height: "520px", overflowY: "auto", padding: "20px", background: "#f8fffe" }}>
+          {/* Messages — FIX: locked height + isolated scroll container */}
+          <div
+            ref={scrollContainerRef}
+            style={{
+              flex: "1 1 auto",
+              minHeight: "200px",
+              maxHeight: "560px",
+              overflowY: "auto",
+              overscrollBehavior: "contain",
+              padding: "20px",
+              background: "#f8fffe",
+            }}
+          >
             {messages.map((msg, i) => renderMessage(msg, i))}
             <div ref={bottomRef} />
           </div>
 
           {/* Suggestion chips */}
-          <div style={{ padding: "10px 16px", display: "flex", gap: "8px", flexWrap: "wrap", borderTop: "1px solid #e0f7f4", background: "white" }}>
+          <div style={{ padding: "10px 16px", display: "flex", gap: "8px", flexWrap: "wrap", borderTop: "1px solid #e0f7f4", background: "white", flexShrink: 0 }}>
             {SUGGESTIONS.map((s, i) => (
               <button key={i} className="aura-chip" onClick={() => handleSend(s.text)} disabled={loading} style={{
                 background: "#f0fdfa", border: "1px solid #a7f3d0", borderRadius: "999px",
@@ -326,7 +376,7 @@ function AuraChat() {
           </div>
 
           {/* Input bar */}
-          <div style={{ display: "flex", gap: "10px", padding: "14px 16px", borderTop: "1px solid #e0f7f4", background: "white" }}>
+          <div style={{ display: "flex", gap: "10px", padding: "14px 16px", borderTop: "1px solid #e0f7f4", background: "white", flexShrink: 0 }}>
             <input
               type="text"
               placeholder='Try "what clashes do I have?" or "help me prepare for Physics"'
