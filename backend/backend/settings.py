@@ -122,6 +122,8 @@ CORS_ALLOWED_ORIGINS = [
     # ← Add your Vercel URL after deploying frontend
     # "https://acadence.vercel.app",
     "https://Acadence-frontend.onrender.com",
+     "https://acadence-frontend.onrender.com",
+
 ]
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = [
