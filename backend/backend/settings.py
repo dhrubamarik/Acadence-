@@ -146,3 +146,10 @@ EMAIL_TIMEOUT       = 10  # Prevents Gunicorn timeouts if SMTP hangs
 PROFESSOR_EMAIL = os.getenv('PROFESSOR_EMAIL')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# ── Email Settings (HTTP API via Resend) ────────────────────
+EMAIL_BACKEND = "anymail.backends.resend.EmailBackend"
+ANYMAIL = {
+    "RESEND_API_KEY": os.getenv("RESEND_API_KEY"),
+}
+DEFAULT_FROM_EMAIL = "onboarding@resend.dev"  # Default sender for testing
