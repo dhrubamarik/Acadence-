@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'api',
     'corsheaders',
+    'anymail',           # ← Add anymail to installed apps
 ]
 
 MIDDLEWARE = [
@@ -53,7 +54,7 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
-                'django.template.processors.request',
+                'django.template.context_processors.request',  # ← FIXED: Added "context_"
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
@@ -132,24 +133,14 @@ CORS_ALLOW_HEADERS = [
 # ── Auth ───────────────────────────────────────────────────
 AUTH_USER_MODEL = 'api.User'
 
-# ── Email ──────────────────────────────────────────────────
-EMAIL_BACKEND       = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST          = 'smtp.gmail.com'
-EMAIL_PORT          = 587
-EMAIL_USE_TLS       = True
-EMAIL_HOST_USER     = os.getenv('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
-DEFAULT_FROM_EMAIL  = f"Acadence <{os.getenv('EMAIL_HOST_USER')}>"
-EMAIL_TIMEOUT       = 10  # Prevents Gunicorn timeouts if SMTP hangs
-
-# ── Professor Alert ────────────────────────────────────────
-PROFESSOR_EMAIL = os.getenv('PROFESSOR_EMAIL')
-
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
 # ── Email Settings (HTTP API via Resend) ────────────────────
 EMAIL_BACKEND = "anymail.backends.resend.EmailBackend"
 ANYMAIL = {
     "RESEND_API_KEY": os.getenv("RESEND_API_KEY"),
 }
 DEFAULT_FROM_EMAIL = "onboarding@resend.dev"  # Default sender for testing
+
+# ── Professor Alert ────────────────────────────────────────
+PROFESSOR_EMAIL = os.getenv('PROFESSOR_EMAIL')
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
