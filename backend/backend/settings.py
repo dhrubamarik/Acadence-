@@ -144,3 +144,14 @@ DEFAULT_FROM_EMAIL = "onboarding@resend.dev"  # Default sender for testing
 PROFESSOR_EMAIL = os.getenv('PROFESSOR_EMAIL')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# ── Email Settings (Gmail SMTP via SSL Port 465) ─────────────
+EMAIL_BACKEND       = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST          = 'smtp.gmail.com'
+EMAIL_PORT          = 465
+EMAIL_USE_TLS       = False
+EMAIL_USE_SSL       = True
+EMAIL_HOST_USER     = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD') # 16-char Google App Password
+DEFAULT_FROM_EMAIL  = f"Acadence <{os.getenv('EMAIL_HOST_USER')}>"
+EMAIL_TIMEOUT       = 10
