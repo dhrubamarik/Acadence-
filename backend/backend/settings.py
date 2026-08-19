@@ -1,5 +1,6 @@
 from pathlib import Path
 import os
+from datetime import timedelta
 from dotenv import load_dotenv
 import dj_database_url
 
@@ -29,12 +30,13 @@ INSTALLED_APPS = [
     'rest_framework',
     'api',
     'corsheaders',
+    'anymail',           # ← Add anymail to installed apps
 ]
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # ← ADD
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # ← WhiteNoise static file serving
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -52,7 +54,7 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
-                'django.template.context_processors.request',
+                'django.template.context_processors.request',  # ← FIXED: Added "context_"
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
@@ -86,9 +88,14 @@ USE_TZ        = True
 # ── Static files ───────────────────────────────────────────
 STATIC_URL  = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_STORAGE = (
-    'whitenoise.storage.CompressedManifestStaticFilesStorage'
-)
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
+    },
+}
 
 # ── Media files ────────────────────────────────────────────
 MEDIA_URL  = '/media/'
@@ -101,7 +108,6 @@ REST_FRAMEWORK = {
     ),
 }
 
-from datetime import timedelta
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME':  timedelta(hours=24),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
@@ -112,8 +118,8 @@ CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-    # ← Add your Vercel URL after deploying frontend
-    # "https://acadence.vercel.app",
+    "https://Acadence-frontend.onrender.com",
+    "https://acadence-frontend.onrender.com",
 ]
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = [
@@ -127,16 +133,25 @@ CORS_ALLOW_HEADERS = [
 # ── Auth ───────────────────────────────────────────────────
 AUTH_USER_MODEL = 'api.User'
 
-# ── Email ──────────────────────────────────────────────────
-EMAIL_BACKEND       = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST          = 'smtp.gmail.com'
-EMAIL_PORT          = 587
-EMAIL_USE_TLS       = True
-EMAIL_HOST_USER     = os.getenv('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
-DEFAULT_FROM_EMAIL  = f"Acadence <{os.getenv('EMAIL_HOST_USER')}>"
+# ── Email Settings (HTTP API via Resend) ────────────────────
+EMAIL_BACKEND = "anymail.backends.resend.EmailBackend"
+ANYMAIL = {
+    "RESEND_API_KEY": os.getenv("RESEND_API_KEY"),
+}
+DEFAULT_FROM_EMAIL = "onboarding@resend.dev"  # Default sender for testing
 
 # ── Professor Alert ────────────────────────────────────────
 PROFESSOR_EMAIL = os.getenv('PROFESSOR_EMAIL')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# ── Email Settings (Gmail SMTP via SSL Port 465) ─────────────
+EMAIL_BACKEND       = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST          = 'smtp.gmail.com'
+EMAIL_PORT          = 465
+EMAIL_USE_TLS       = False
+EMAIL_USE_SSL       = True
+EMAIL_HOST_USER     = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD') # 16-char Google App Password
+DEFAULT_FROM_EMAIL  = f"Acadence <{os.getenv('EMAIL_HOST_USER')}>"
+EMAIL_TIMEOUT       = 10

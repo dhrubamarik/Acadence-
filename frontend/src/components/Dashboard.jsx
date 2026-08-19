@@ -1,4 +1,4 @@
-// Dashboard.jsx - Phase 3: AI Recommendations added
+// Dashboard.jsx - Phase 3: AI Recommendations + Scrollable Layout
 // All existing logic untouched
 
 import { useMemo, useEffect, useState } from 'react'
@@ -398,9 +398,13 @@ function Dashboard({ tasks, analytics }) {
   return (
     <>
       <style>{cardStyle}</style>
-      <div style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+      <div style={{ 
+        fontFamily: "'Plus Jakarta Sans', sans-serif",
+        maxWidth: "1400px",
+        margin: "0 auto",
+      }}>
 
-        {/* ── Header — unchanged ── */}
+        {/* ── Header ── */}
         <div style={{ marginBottom: "32px" }}>
           <h1 style={{
             fontFamily: "'Lora', serif",
@@ -509,7 +513,7 @@ function Dashboard({ tasks, analytics }) {
           </div>
         )}
 
-        {/* ── Stats Row — unchanged ── */}
+        {/* ── Stats Row ── */}
         <div style={{
           display: "grid", gridTemplateColumns: "repeat(4, 1fr)",
           gap: "18px", marginBottom: "28px",
@@ -554,7 +558,7 @@ function Dashboard({ tasks, analytics }) {
           ))}
         </div>
 
-        {/* ── Bottom Two Columns — unchanged ── */}
+        {/* ── Bottom Two Columns ── */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "22px" }}>
 
           {/* LEFT — Course Breakdown */}

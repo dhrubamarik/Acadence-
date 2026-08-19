@@ -1,9 +1,8 @@
-// App.jsx - Polished light gradient theme (zero logic changes)
+// App.jsx - Polished light gradient theme with SCROLLABLE sidebar
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from './context/AuthContext'
 import API from './api'
-import { PanelLeft,LogOut } from "lucide-react"
 
 import Dashboard from './components/Dashboard'
 import TaskForm from './components/TaskForm'
@@ -28,9 +27,8 @@ const NAV_ITEMS = [
   { id: "stress", icon: "🌡️", label: "Stress Map" },
   { id: "clashes", icon: "⚡", label: "Clashes" },
   { id: "department", icon: "🏫", label: "Department" },
-  { id: "alerts", icon: "🚨", label: "Professor Alerts" },
-  { id: "files", icon: "📁", label: "Department Files" },
-
+  { id: "alerts", icon: "🚨", label: "Prof Alerts" },
+  { id: "files", icon: "📁", label: "Dept Files" },
 ]
 
 /* ── Design tokens ── */
@@ -66,6 +64,7 @@ const globalStyles = `
   ::-webkit-scrollbar { width: 5px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: #99f6e4; border-radius: 99px; }
+  ::-webkit-scrollbar-thumb:hover { background: #5eead4; }
 
   @keyframes fadeSlideIn {
     from { opacity: 0; transform: translateY(12px); }
@@ -83,6 +82,27 @@ const globalStyles = `
     background: rgba(13,148,136,0.10) !important;
     color: #0d9488 !important;
     transform: translateX(2px);
+  }
+
+  /* Sidebar Nav Scrollbar */
+  .sidebar-nav {
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(94, 234, 212, 0.4) transparent;
+  }
+  .sidebar-nav::-webkit-scrollbar {
+    width: 4px;
+  }
+  .sidebar-nav::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .sidebar-nav::-webkit-scrollbar-thumb {
+    background: rgba(94, 234, 212, 0.4);
+    border-radius: 99px;
+  }
+  .sidebar-nav::-webkit-scrollbar-thumb:hover {
+    background: rgba(94, 234, 212, 0.7);
   }
 `
 
@@ -139,13 +159,14 @@ function App() {
         {/* ══════════════════════════ SIDEBAR ══════════════════════════ */}
         <div style={{
           width: SIDEBAR_W,
-          minHeight: "100vh",
-          background: "linear-gradient(180deg, #0f2a27 0%, #0d3d38 60%, #0a2e2a 100%)",
+          height: "100vh",          /* FIX: was minHeight, which let the box grow past
+                                        the viewport instead of clipping it */
           display: "flex",
           flexDirection: "column",
           position: "fixed",
           top: 0, left: 0,
           zIndex: 200,
+          background: "linear-gradient(180deg, #0f2a27 0%, #0d3d38 60%, #0a2e2a 100%)",
           transition: "width 0.25s cubic-bezier(0.23,1,0.32,1)",
           overflow: "hidden",
           boxShadow: "4px 0 32px rgba(13,148,136,0.15)",
@@ -170,6 +191,7 @@ function App() {
             justifyContent: "space-between",
             gap: "10px",
             position: "relative",
+            flexShrink: 0,
           }}>
             {sidebarOpen && (
               <div>
@@ -210,17 +232,20 @@ function App() {
                 transition: "all 0.15s",
               }}
             >
-              <PanelLeft size={18}
-              style={{
-                transition: "transfrom 0.2s ease",
-                transform: sidebarOpen ? "rotate(0deg)" : "rotate(180deg)",
-              }}
-              />
+              {sidebarOpen ? "◀" : "▶"}
             </button>
           </div>
 
-          {/* ── Nav Items ── */}
-          <nav style={{ flex: 1, padding: "14px 10px" }}>
+          {/* ── Nav Items (SCROLLABLE) ── */}
+          <nav className="sidebar-nav" style={{
+            flex: 1,
+            minHeight: 0,           /* FIX: without this, a flex child won't shrink
+                                        below its content size, so overflow-y:auto
+                                        never actually engages */
+            padding: "14px 10px",
+            overflowY: "auto",
+            overflowX: "hidden",
+          }}>
             {NAV_ITEMS.map(item => {
               const isActive = activePage === item.id
               return (
@@ -275,10 +300,12 @@ function App() {
             })}
           </nav>
 
-          {/* ── User Section ── */}
+          {/* ── User Section (Fixed at Bottom) ── */}
           <div style={{
             padding: "12px 10px 16px",
             borderTop: "1px solid rgba(255,255,255,0.06)",
+            background: "rgba(0,0,0,0.15)",
+            flexShrink: 0,
           }}>
             {sidebarOpen && user?.department_name && (
               <div style={{
@@ -361,7 +388,7 @@ function App() {
                 transition: "all 0.15s",
               }}
             >
-              <LogOut size={16}/>
+              <span>🚪</span>
               {sidebarOpen && "Logout"}
             </button>
           </div>
@@ -374,6 +401,7 @@ function App() {
           padding: "36px 40px",
           transition: "margin-left 0.25s cubic-bezier(0.23,1,0.32,1)",
           minHeight: "100vh",
+          overflowY: "auto",
         }}>
           <div className="page-enter" key={activePage}>
 
@@ -428,37 +456,22 @@ function App() {
                 <Clashes clashes={analytics.clashes} />
               </div>
             )}
-            {/* DEPARTMENT */}
-            {activePage === "department" && (
-              <div>
-                <PageHeader
-                  icon="🏫"
-                  title="Department Intelligence"
-                  subtitle="Collective stress data and crowd-sourced task difficulty from your department"
-                />
-                <DepartmentDashboard />
-              </div>
-            )}
-            {activePage === "alerts" && (
-              <div>
-                <PageHeader
-                  icon="🚨"
-                  title="Professor Alert System"
-                  subtitle="Raise stress alerts and track department-wide academic pressure"
-                />
-                <ProfessorAlerts />
-              </div>
-            )}
-            {activePage === "files" && (
-              <div>
-                <PageHeader
-                  icon="📁"
-                  title="Department Files"
-                  subtitle="Share assignments, lab copies and notes with your department"
-                />
-                <DepartmentFiles />
-              </div>
-            )}
+
+            {/* NOTE: no <PageHeader> here — DepartmentDashboard renders its own
+                header (department name, code, student count), so wrapping it
+                in PageHeader produced a duplicate heading. */}
+            {activePage === "department" && <DepartmentDashboard />}
+
+            {/* NOTE: no <PageHeader> here — ProfessorAlerts renders its own
+                header (department name, code, Raise Stress Alert button),
+                so wrapping it in PageHeader produced a duplicate heading. */}
+            {activePage === "alerts" && <ProfessorAlerts />}
+
+            {/* NOTE: no <PageHeader> here — DepartmentFiles renders its own
+                header (dept name, code, file count, upload button), so adding
+                PageHeader on top of it produced a duplicate "Department Files"
+                heading. Just render the component directly. */}
+            {activePage === "files" && <DepartmentFiles />}
 
           </div>
         </div>
