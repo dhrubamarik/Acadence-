@@ -1,5 +1,4 @@
-// src/api.js - COMPLETE FILE (Copy-Paste This)
-
+// src/api.js - Production Ready (No Debug Logs)
 import axios from 'axios'
 
 // ✅ Proper URL handling - force HTTP for localhost
@@ -21,15 +20,21 @@ const getAPIBaseURL = () => {
 
 const API_BASE_URL = getAPIBaseURL()
 
-console.log('🔌 API Base URL:', API_BASE_URL)
+// 🔇 Only log in development mode
+const isDev = import.meta.env.DEV
+if (isDev) {
+  console.log('🔌 API Base URL:', API_BASE_URL)
+}
 
 const API = axios.create({
   baseURL: `${API_BASE_URL}/api/`,
   withCredentials: true,
-  // ❌ DON'T set Content-Type here - it will be set per-request
 })
 
-// Request Interceptor
+// ── Track Cold Start State ─────────────────────────────────
+let isWakingUp = false
+
+// ── Request Interceptor ────────────────────────────────────
 API.interceptors.request.use(
   config => {
     const token = localStorage.getItem('access_token')
@@ -41,22 +46,39 @@ API.interceptors.request.use(
     if (!(config.data instanceof FormData)) {
       config.headers['Content-Type'] = 'application/json'
     }
-    // For FormData, browser will automatically set:
-    // Content-Type: multipart/form-data; boundary=----WebKitFormBoundary...
     
     return config
   },
   error => Promise.reject(error)
 )
 
-// Response Interceptor
+// ── Response Interceptor (with Cold Start Handling) ────────
 API.interceptors.response.use(
   response => {
-    console.log('✅ API Response:', response.config.method?.toUpperCase(), response.config.url, response.status)
+    // 🔇 Only log in development
+    if (isDev) {
+      console.log('✅ API Response:', response.config.method?.toUpperCase(), response.config.url, response.status)
+    }
+    
+    // Reset cold start state on successful response
+    if (isWakingUp) {
+      isWakingUp = false
+      window.dispatchEvent(new CustomEvent('api-server-awake'))
+    }
+    
     return response
   },
   async error => {
-    console.error('❌ API Error:', error.response?.status, error.config?.url, error.response?.data)
+    // ✅ Cold Start Detection: No response = server sleeping
+    if (!error.response && !isWakingUp) {
+      isWakingUp = true
+      window.dispatchEvent(new CustomEvent('api-cold-start'))
+    }
+    
+    // 🔇 Only log errors in development
+    if (isDev) {
+      console.error('❌ API Error:', error.response?.status, error.config?.url, error.response?.data)
+    }
     
     const originalRequest = error.config
 

@@ -1,4 +1,4 @@
-// App.jsx - Polished light gradient theme with SCROLLABLE sidebar
+// App.jsx - Polished light gradient theme with SCROLLABLE sidebar + Cold Start Banner
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from './context/AuthContext'
@@ -71,6 +71,16 @@ const globalStyles = `
     to   { opacity: 1; transform: translateY(0); }
   }
 
+  @keyframes slideDown {
+    from { opacity: 0; transform: translate(-50%, -20px); }
+    to   { opacity: 1; transform: translate(-50%, 0); }
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+
   .page-enter {
     animation: fadeSlideIn 0.35s cubic-bezier(0.23,1,0.32,1) both;
   }
@@ -114,6 +124,30 @@ function App() {
   const [analytics, setAnalytics] = useState({})
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [userInsights, setUserInsights] = useState(null)
+  
+  // ── Cold Start Banner State ──────────────────────────────
+  const [serverWaking, setServerWaking] = useState(false)
+
+  // ── Listen for Cold Start Events ─────────────────────────
+  useEffect(() => {
+    const handleColdStart = () => {
+      console.log('📡 Cold start event received')
+      setServerWaking(true)
+    }
+    
+    const handleServerAwake = () => {
+      console.log('✅ Server awake event received')
+      setServerWaking(false)
+    }
+    
+    window.addEventListener('api-cold-start', handleColdStart)
+    window.addEventListener('api-server-awake', handleServerAwake)
+    
+    return () => {
+      window.removeEventListener('api-cold-start', handleColdStart)
+      window.removeEventListener('api-server-awake', handleServerAwake)
+    }
+  }, [])
 
   const fetchTasks = async () => {
     try { const res = await API.get("tasks/"); setTasks(res.data) }
@@ -156,11 +190,43 @@ function App() {
         fontFamily: "'Plus Jakarta Sans', sans-serif",
       }}>
 
+        {/* ══════════════════════════ COLD START BANNER ══════════════════════════ */}
+        {serverWaking && (
+          <div style={{
+            position: "fixed",
+            top: "20px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 9999,
+            animation: "slideDown 0.3s cubic-bezier(0.23,1,0.32,1) both",
+          }}>
+            <div style={{
+              background: "linear-gradient(135deg, #f59e0b, #d97706)",
+              color: "white",
+              padding: "14px 28px",
+              borderRadius: "14px",
+              fontSize: "14px",
+              fontWeight: "600",
+              boxShadow: "0 8px 32px rgba(245, 158, 11, 0.4)",
+              border: "1px solid rgba(255,255,255,0.2)",
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              backdropFilter: "blur(8px)",
+            }}>
+              <span style={{
+                fontSize: "18px",
+                animation: "pulse 1.5s ease-in-out infinite",
+              }}>⏳</span>
+              <span>Server is waking up, please wait...</span>
+            </div>
+          </div>
+        )}
+
         {/* ══════════════════════════ SIDEBAR ══════════════════════════ */}
         <div style={{
           width: SIDEBAR_W,
-          height: "100vh",          /* FIX: was minHeight, which let the box grow past
-                                        the viewport instead of clipping it */
+          height: "100vh",
           display: "flex",
           flexDirection: "column",
           position: "fixed",
@@ -239,9 +305,7 @@ function App() {
           {/* ── Nav Items (SCROLLABLE) ── */}
           <nav className="sidebar-nav" style={{
             flex: 1,
-            minHeight: 0,           /* FIX: without this, a flex child won't shrink
-                                        below its content size, so overflow-y:auto
-                                        never actually engages */
+            minHeight: 0,
             padding: "14px 10px",
             overflowY: "auto",
             overflowX: "hidden",
@@ -457,20 +521,10 @@ function App() {
               </div>
             )}
 
-            {/* NOTE: no <PageHeader> here — DepartmentDashboard renders its own
-                header (department name, code, student count), so wrapping it
-                in PageHeader produced a duplicate heading. */}
             {activePage === "department" && <DepartmentDashboard />}
 
-            {/* NOTE: no <PageHeader> here — ProfessorAlerts renders its own
-                header (department name, code, Raise Stress Alert button),
-                so wrapping it in PageHeader produced a duplicate heading. */}
             {activePage === "alerts" && <ProfessorAlerts />}
 
-            {/* NOTE: no <PageHeader> here — DepartmentFiles renders its own
-                header (dept name, code, file count, upload button), so adding
-                PageHeader on top of it produced a duplicate "Department Files"
-                heading. Just render the component directly. */}
             {activePage === "files" && <DepartmentFiles />}
 
           </div>
