@@ -336,7 +336,7 @@ function AuraChat() {
           boxShadow: "0 4px 24px rgba(13,148,136,0.10)",
           display: "flex",
           flexDirection: "column",
-          maxHeight: "calc(100vh - 100px)",
+          maxHeight: "calc(100vh - 200px)",
         }}>
           {/* Chat header bar */}
           <div style={{
@@ -386,8 +386,8 @@ function AuraChat() {
             ref={scrollContainerRef}
             style={{
               flex: "1 1 auto",
-              minHeight: "320px",
-              maxHeight: "760px",
+              minHeight: "260px",
+              maxHeight: "620px",
               overflowY: "auto",
               overscrollBehavior: "contain",
               padding: "20px",
