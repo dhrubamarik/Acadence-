@@ -1,4 +1,4 @@
-# backend/settings.py - COMPLETE FILE (Copy-Paste This)
+# backend/settings.py - COMPLETE FILE (Works for Local + Production)
 
 from pathlib import Path
 import os
@@ -13,7 +13,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-change-this-in-production')
 
 # ── Production toggle ──────────────────────────────────────
-DEBUG = os.getenv('DEBUG', 'True') == 'True'  # ← Default to True for local
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = [
     'localhost',
@@ -36,7 +36,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # ← MUST BE FIRST
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -126,11 +126,13 @@ SIMPLE_JWT = {
 }
 
 # ── CORS ───────────────────────────────────────────────────
+# ✅ Allow both local AND production frontend URLs
 CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "https://acadence-frontend.vercel.app",
+    "https://acadence-frontend.onrender.com",  # ← FIXED: Added -frontend
     "https://acadence.onrender.com",
 ]
 
@@ -153,13 +155,14 @@ CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "https://acadence-frontend.vercel.app",
+    "https://acadence-frontend.onrender.com",  # ← FIXED: Added -frontend
     "https://acadence.onrender.com",
 ]
 
 CSRF_COOKIE_SAMESITE = 'Lax'
-CSRF_COOKIE_SECURE = False  # ← MUST BE FALSE for local HTTP
+CSRF_COOKIE_SECURE = not DEBUG  # True in production, False locally
 SESSION_COOKIE_SAMESITE = 'Lax'
-SESSION_COOKIE_SECURE = False  # ← MUST BE FALSE for local HTTP
+SESSION_COOKIE_SECURE = not DEBUG  # True in production, False locally
 
 # ── Auth ───────────────────────────────────────────────────
 AUTH_USER_MODEL = 'api.User'
@@ -181,10 +184,9 @@ PROFESSOR_EMAIL = os.getenv('PROFESSOR_EMAIL')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # ── Security Settings ──────────────────────────────────────
-# ⚠️ ONLY enable these when DEBUG=False AND you have HTTPS
 if not DEBUG:
-    SECURE_SSL_REDIRECT = False  # ← Keep FALSE for local testing
-    SESSION_COOKIE_SECURE = False
-    CSRF_COOKIE_SECURE = False
+    SECURE_SSL_REDIRECT = False  # Keep False on Render (they handle HTTPS)
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
