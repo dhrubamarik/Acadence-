@@ -1,3 +1,5 @@
+# backend/settings.py - COMPLETE FILE (Copy-Paste This)
+
 from pathlib import Path
 import os
 from datetime import timedelta
@@ -8,16 +10,17 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-change-this')
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-change-this-in-production')
 
 # ── Production toggle ──────────────────────────────────────
-DEBUG = os.getenv('DEBUG', 'False') == 'True'
+DEBUG = os.getenv('DEBUG', 'True') == 'True'  # ← Default to True for local
 
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
-    '.onrender.com',     # ← Render backend
-    '.vercel.app',       # ← just in case
+    '.onrender.com',
+    '.vercel.app',
+    '*',
 ]
 
 INSTALLED_APPS = [
@@ -30,13 +33,12 @@ INSTALLED_APPS = [
     'rest_framework',
     'api',
     'corsheaders',
-    'anymail',           # ← Add anymail to installed apps
 ]
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # ← WhiteNoise static file serving
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -54,7 +56,7 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
-                'django.template.context_processors.request',  # ← FIXED: Added "context_"
+                'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
@@ -65,7 +67,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'backend.wsgi.application'
 
 # ── Database ───────────────────────────────────────────────
-# Auto-switches: SQLite locally → PostgreSQL on Render
 DATABASES = {
     'default': dj_database_url.config(
         default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
@@ -101,16 +102,27 @@ STORAGES = {
 MEDIA_URL  = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+# ── File Upload Settings ───────────────────────────────────
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
+
 # ── REST Framework ─────────────────────────────────────────
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PARSER_CLASSES': (
+        'rest_framework.parsers.JSONParser',
+        'rest_framework.parsers.FormParser',
+        'rest_framework.parsers.MultiPartParser',
     ),
 }
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME':  timedelta(hours=24),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
 }
 
 # ── CORS ───────────────────────────────────────────────────
@@ -118,40 +130,61 @@ CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-    "https://Acadence-frontend.onrender.com",
-    "https://acadence-frontend.onrender.com",
+    "https://acadence-frontend.vercel.app",
+    "https://acadence.onrender.com",
 ]
+
 CORS_ALLOW_CREDENTIALS = True
+
 CORS_ALLOW_HEADERS = [
     'accept',
+    'accept-encoding',
     'authorization',
     'content-type',
+    'dnt',
     'origin',
+    'user-agent',
+    'x-csrftoken',
     'x-requested-with',
 ]
+
+# ── CSRF Settings ──────────────────────────────────────────
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "https://acadence-frontend.vercel.app",
+    "https://acadence.onrender.com",
+]
+
+CSRF_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SECURE = False  # ← MUST BE FALSE for local HTTP
+SESSION_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SECURE = False  # ← MUST BE FALSE for local HTTP
 
 # ── Auth ───────────────────────────────────────────────────
 AUTH_USER_MODEL = 'api.User'
 
-# ── Email Settings (HTTP API via Resend) ────────────────────
-EMAIL_BACKEND = "anymail.backends.resend.EmailBackend"
-ANYMAIL = {
-    "RESEND_API_KEY": os.getenv("RESEND_API_KEY"),
-}
-DEFAULT_FROM_EMAIL = "onboarding@resend.dev"  # Default sender for testing
-
-# ── Professor Alert ────────────────────────────────────────
-PROFESSOR_EMAIL = os.getenv('PROFESSOR_EMAIL')
-
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# ── Email Settings (Gmail SMTP via SSL Port 465) ─────────────
+# ── Email Settings (Gmail SMTP) ────────────────────────────
 EMAIL_BACKEND       = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST          = 'smtp.gmail.com'
 EMAIL_PORT          = 465
 EMAIL_USE_TLS       = False
 EMAIL_USE_SSL       = True
 EMAIL_HOST_USER     = os.getenv('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD') # 16-char Google App Password
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL  = f"Acadence <{os.getenv('EMAIL_HOST_USER')}>"
 EMAIL_TIMEOUT       = 10
+
+# ── Professor Alert ────────────────────────────────────────
+PROFESSOR_EMAIL = os.getenv('PROFESSOR_EMAIL')
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# ── Security Settings ──────────────────────────────────────
+# ⚠️ ONLY enable these when DEBUG=False AND you have HTTPS
+if not DEBUG:
+    SECURE_SSL_REDIRECT = False  # ← Keep FALSE for local testing
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True

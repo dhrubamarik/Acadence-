@@ -1,42 +1,114 @@
-// PDFUpload.jsx - Add task type selection
+// PDFUpload.jsx - Complete with debugging & error handling
 import { useState } from 'react'
 import API from '../api'
 
-//  PDFUpload.jsx  —  Polished (zero logic changes)
-// ════════════════════════════════════════════════════
 export function PDFUpload({ onTasksGenerated }) {
-  const [file,     setFile]     = useState(null)
-  const [loading,  setLoading]  = useState(false)
-  const [message,  setMessage]  = useState("")
+  const [file, setFile] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [message, setMessage] = useState("")
   const [dragOver, setDragOver] = useState(false)
   const [taskType, setTaskType] = useState("group")
  
   const handleFileChange = (e) => {
     const selected = e.target.files[0]
     if (selected && selected.type === "application/pdf") {
-      setFile(selected); setMessage(`✅ Selected: ${selected.name}`)
-    } else { setMessage("❌ Please select a PDF file only."); setFile(null) }
+      setFile(selected)
+      setMessage(`✅ Selected: ${selected.name}`)
+      console.log('📄 File selected:', selected.name, 'Size:', selected.size, 'Type:', selected.type)
+    } else {
+      setMessage("❌ Please select a PDF file only.")
+      setFile(null)
+      console.error('❌ Invalid file type:', selected?.type)
+    }
   }
  
   const handleUpload = async () => {
-    if (!file) { setMessage("⚠️ Please select a PDF file first!"); return }
-    setLoading(true); setMessage("🔍 Reading PDF and extracting tasks...")
-    const formData = new FormData(); formData.append('file', file)
-    try {
-      const res = await API.post("pdf-parse/", formData, { headers: { 'Content-Type': 'multipart/form-data' } })
-      const tasks = res.data
-      if (tasks.error) { setMessage(`❌ ${tasks.error}`); setLoading(false); return }
-      setMessage(`⏳ Found ${tasks.length} tasks. Saving as ${taskType}...`)
-      let saved = 0
-      for (const task of tasks) {
-        try { await API.post("tasks/", { ...task, task_type: taskType }); saved++ }
-        catch (err) { console.error("Failed to save:", err.response?.data) }
-      }
-      setMessage(`🎉 Saved ${saved} of ${tasks.length} tasks as ${taskType}!`)
-      setFile(null); onTasksGenerated()
-    } catch (error) {
-      setMessage(`❌ ${error.response?.data?.error || "Upload failed."}`)
+    if (!file) {
+      setMessage("⚠️ Please select a PDF file first!")
+      return
     }
+
+    console.log('🚀 Starting PDF upload...')
+    console.log('📄 File:', file.name, 'Size:', file.size)
+    console.log('🔑 Token exists:', !!localStorage.getItem('access_token'))
+    console.log('📝 Task Type:', taskType)
+
+    setLoading(true)
+    setMessage("🔍 Reading PDF and extracting tasks...")
+
+    const formData = new FormData()
+    formData.append('file', file)
+
+    try {
+      console.log('📤 Sending POST request to pdf-parse/...')
+      console.log('FormData entries:', [...formData.entries()])
+      
+      // ✅ DON'T set Content-Type header - let browser handle multipart/form-data with boundary
+      const res = await API.post("pdf-parse/", formData)
+
+      console.log('✅ Backend Response:', res.data)
+
+      const tasks = res.data
+
+      // Handle error response
+      if (tasks.error) {
+        setMessage(`❌ ${tasks.error}`)
+        setLoading(false)
+        return
+      }
+
+      // Handle empty tasks
+      if (!tasks || tasks.length === 0) {
+        setMessage("❌ AI found no tasks. Try a different PDF with clear dates.")
+        setLoading(false)
+        return
+      }
+
+      setMessage(`⏳ Found ${tasks.length} tasks. Saving as ${taskType}...`)
+      
+      let saved = 0
+      let failed = 0
+
+      for (const task of tasks) {
+        try {
+          console.log('💾 Saving task:', task.title)
+          
+          await API.post("tasks/", {
+            title: task.title || 'Untitled Task',
+            deadline: task.deadline,
+            priority: task.priority || 'medium',
+            course: task.course || 'General',
+            task_type: taskType
+          })
+          
+          saved++
+          console.log(`✅ Task ${saved}/${tasks.length} saved`)
+        } catch (err) {
+          failed++
+          console.error("❌ Failed to save task:", task.title, err.response?.data)
+        }
+      }
+
+      if (saved > 0) {
+        setMessage(`🎉 Saved ${saved} of ${tasks.length} tasks as ${taskType}!`)
+        setFile(null)
+        if (onTasksGenerated) {
+          onTasksGenerated()
+        }
+      } else {
+        setMessage(`❌ Failed to save any tasks. Check console for details.`)
+      }
+
+    } catch (error) {
+      console.error('❌ Upload Error:', error)
+      console.error('Error Response:', error.response?.data)
+      console.error('Error Status:', error.response?.status)
+      console.error('Error Headers:', error.response?.headers)
+      
+      const errorMsg = error.response?.data?.error || error.message || "Upload failed."
+      setMessage(`❌ ${errorMsg}`)
+    }
+
     setLoading(false)
   }
  
@@ -84,8 +156,14 @@ export function PDFUpload({ onTasksGenerated }) {
         onDrop={e => {
           e.preventDefault(); setDragOver(false)
           const dropped = e.dataTransfer.files[0]
-          if (dropped?.type === "application/pdf") { setFile(dropped); setMessage(`✅ Dropped: ${dropped.name}`) }
-          else setMessage("❌ Only PDF files accepted.")
+          if (dropped?.type === "application/pdf") {
+            setFile(dropped)
+            setMessage(`✅ Dropped: ${dropped.name}`)
+            console.log('📄 File dropped:', dropped.name, 'Size:', dropped.size)
+          } else {
+            setMessage("❌ Only PDF files accepted.")
+            console.error('❌ Invalid dropped file type:', dropped?.type)
+          }
         }}
       >
         <div style={{ fontSize: "52px", marginBottom: "12px" }}>📄</div>
@@ -129,7 +207,9 @@ export function PDFUpload({ onTasksGenerated }) {
     </div>
   )
 }
+
 export default PDFUpload
+
 const card = {
   background: "#ffffff",
   border: "1px solid rgba(13,148,136,0.12)",

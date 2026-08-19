@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, useLocation, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import API from '../api'
@@ -7,6 +7,91 @@ const globalStyles = `
   @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:wght@600&display=swap');
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 `
+
+/* ── Temporary debug OTP popup ──
+   Shows the OTP inline until email delivery is working in production.
+   Reads the code from wherever the backend hands it back (see notes at
+   bottom of this file) — remove this block once SMTP/email is fixed. */
+function DebugOtpBanner({ otp, onDismiss, onUse }) {
+  const [copied, setCopied] = useState(false)
+  if (!otp) return null
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(otp)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1500)
+    } catch {
+      // clipboard unavailable — silently ignore
+    }
+  }
+
+  return (
+    <div style={{
+      background: "linear-gradient(135deg, #fffbeb, #fef3c7)",
+      border: "1.5px solid #fbbf24",
+      borderRadius: "14px",
+      padding: "14px 16px",
+      marginBottom: "22px",
+      textAlign: "left",
+    }}>
+      <div style={{ display: "flex", alignItems: "flex-start", gap: "10px", marginBottom: "10px" }}>
+        <span style={{ fontSize: "18px", flexShrink: 0 }}>🚧</span>
+        <div style={{ flex: 1 }}>
+          <strong style={{ fontSize: "12.5px", color: "#92400e" }}>Temporary debug mode</strong>
+          <p style={{ margin: "2px 0 0", fontSize: "12px", color: "#b45309", lineHeight: "1.5" }}>
+            Email delivery isn't live yet, so your code is shown here for now.
+          </p>
+        </div>
+        <button
+          onClick={onDismiss}
+          aria-label="Dismiss"
+          style={{
+            background: "none", border: "none", cursor: "pointer",
+            color: "#b45309", fontSize: "14px", padding: "2px 4px", lineHeight: 1,
+          }}
+        >✕</button>
+      </div>
+
+      <div style={{
+        display: "flex", alignItems: "center", gap: "10px",
+        background: "white", border: "1px solid #fde68a", borderRadius: "10px",
+        padding: "10px 14px",
+      }}>
+        <span style={{
+          flex: 1, fontSize: "22px", fontWeight: "800", letterSpacing: "6px",
+          color: "#92400e", fontFamily: "'Plus Jakarta Sans', sans-serif",
+        }}>{otp}</span>
+        <button
+          type="button"
+          onClick={handleCopy}
+          style={{
+            background: copied ? "#0d9488" : "#fef3c7",
+            color: copied ? "white" : "#92400e",
+            border: "1px solid #fbbf24", borderRadius: "8px",
+            padding: "6px 10px", fontSize: "11.5px", fontWeight: "700",
+            cursor: "pointer", whiteSpace: "nowrap",
+            fontFamily: "'Plus Jakarta Sans', sans-serif",
+            transition: "all 0.15s",
+          }}
+        >{copied ? "✓ Copied" : "Copy"}</button>
+        {onUse && (
+          <button
+            type="button"
+            onClick={onUse}
+            style={{
+              background: "#0d9488", color: "white",
+              border: "none", borderRadius: "8px",
+              padding: "6px 10px", fontSize: "11.5px", fontWeight: "700",
+              cursor: "pointer", whiteSpace: "nowrap",
+              fontFamily: "'Plus Jakarta Sans', sans-serif",
+            }}
+          >Fill in</button>
+        )}
+      </div>
+    </div>
+  )
+}
 
 function Verify() {
   const navigate  = useNavigate()
@@ -19,6 +104,12 @@ function Verify() {
   const [resending, setResending] = useState(false)
   const [message,   setMessage]   = useState("")
   const [isError,   setIsError]   = useState(false)
+
+  // Debug OTP, if the backend included it in the response.
+  // Picks it up from Register.jsx's navigate state first (e.g.
+  // navigate("/verify", { state: { email, otp: res.data.debug_otp } })),
+  // then falls back to updating from the resend-otp response below.
+  const [debugOtp, setDebugOtp] = useState(location.state?.otp || null)
 
   const handleVerify = async (e) => {
     e.preventDefault(); setLoading(true); setMessage(""); setIsError(false)
@@ -35,8 +126,11 @@ function Verify() {
   const handleResend = async () => {
     setResending(true); setMessage(""); setIsError(false); setOtp("")
     try {
-      await API.post("auth/resend-otp/", { email })
+      const res = await API.post("auth/resend-otp/", { email })
       setMessage("✅ New OTP sent! Check your email inbox.")
+      // If the backend echoes the OTP back (debug/deployment stopgap),
+      // refresh the banner with the new code.
+      if (res.data?.debug_otp) setDebugOtp(res.data.debug_otp)
     } catch (err) {
       setMessage(err.response?.data?.error || "❌ Could not resend OTP."); setIsError(true)
     }
@@ -79,6 +173,12 @@ function Verify() {
             We sent a 6-digit OTP to<br />
             <strong style={{ color: "#0d9488" }}>{email}</strong>
           </p>
+
+          <DebugOtpBanner
+            otp={debugOtp}
+            onDismiss={() => setDebugOtp(null)}
+            onUse={() => setOtp(debugOtp)}
+          />
 
           {/* Info banner */}
           <div style={{

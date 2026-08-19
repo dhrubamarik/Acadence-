@@ -1,6 +1,8 @@
+// src/pages/Register.jsx
 import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import API from '../api'
+import SmoothInput from '../components/SmoothInput'
 
 const globalStyles = `
   @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:wght@600&display=swap');
@@ -10,35 +12,73 @@ const globalStyles = `
 function Register() {
   const navigate = useNavigate()
   const [departments, setDepartments] = useState([])
-  const [loading,     setLoading]     = useState(false)
-  const [message,     setMessage]     = useState("")
-  const [isError,     setIsError]     = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [message, setMessage] = useState("")
+  const [isError, setIsError] = useState(false)
   const [form, setForm] = useState({
     full_name: "", email: "", password: "", confirmPassword: "", department_code: ""
   })
 
+  // ✅ Fetch departments with better error handling
   useEffect(() => {
-    API.get("auth/departments/")
-      .then(res => setDepartments(res.data))
-      .catch(err => console.error("Dept fetch error:", err))
+    const fetchDepartments = async () => {
+      try {
+        const res = await API.get("auth/departments/")
+        setDepartments(res.data || [])
+      } catch (err) {
+        console.error("Dept fetch error:", err)
+        // ✅ Don't block registration if departments fail to load
+        setDepartments([])
+      }
+    }
+    fetchDepartments()
   }, [])
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value })
 
   const handleSubmit = async (e) => {
-    e.preventDefault(); setMessage("")
-    if (form.password !== form.confirmPassword) { setMessage("❌ Passwords do not match!"); setIsError(true); return }
-    if (form.password.length < 6) { setMessage("❌ Password must be at least 6 characters."); setIsError(true); return }
+    e.preventDefault()
+    setMessage("")
+    setIsError(false)
+
+    if (form.password !== form.confirmPassword) {
+      setMessage("❌ Passwords do not match!")
+      setIsError(true)
+      return
+    }
+    if (form.password.length < 6) {
+      setMessage("❌ Password must be at least 6 characters.")
+      setIsError(true)
+      return
+    }
+
     setLoading(true)
     try {
-      await API.post("auth/register/", {
-        full_name: form.full_name, email: form.email,
-        password: form.password, department_code: form.department_code
+      console.log('Registering with:', { email: form.email, dept: form.department_code })
+      
+      const res = await API.post("auth/register/", {
+        full_name: form.full_name,
+        email: form.email,
+        password: form.password,
+        department_code: form.department_code
       })
-      navigate("/verify", { state: { email: form.email } })
+      
+      console.log('Registration successful!')
+      navigate("/verify", { state: { email: form.email, otp: res.data.debug_otp } })
+      
     } catch (err) {
+      console.error('Registration error:', err)
+      console.error('Error response:', err.response?.data)
+      
       const errors = err.response?.data
-      setMessage(errors ? `❌ ${Object.values(errors).flat().join(" ")}` : "❌ Registration failed. Try again.")
+      if (errors) {
+        const errorMessages = Object.values(errors).flat().join(" ")
+        setMessage(`❌ ${errorMessages}`)
+      } else if (err.message === 'Network Error') {
+        setMessage('❌ Cannot connect to server. Please check your connection.')
+      } else {
+        setMessage("❌ Registration failed. Try again.")
+      }
       setIsError(true)
     }
     setLoading(false)
@@ -85,7 +125,7 @@ function Register() {
             ].map(f => (
               <div key={f.name} style={{ marginBottom: "16px" }}>
                 <label style={labelSt}>{f.label}</label>
-                <input type={f.type} name={f.name} placeholder={f.placeholder}
+                <SmoothInput type={f.type} name={f.name} placeholder={f.placeholder}
                   value={form[f.name]} onChange={handleChange} required style={inputSt}
                   onFocus={focusStyle} onBlur={blurStyle}
                 />
@@ -125,7 +165,7 @@ function Register() {
             ].map(f => (
               <div key={f.name} style={{ marginBottom: "16px" }}>
                 <label style={labelSt}>{f.label}</label>
-                <input type="password" name={f.name} placeholder={f.placeholder}
+                <SmoothInput type="password" showPasswordToggle name={f.name} placeholder={f.placeholder}
                   value={form[f.name]} onChange={handleChange} required style={inputSt}
                   onFocus={focusStyle} onBlur={blurStyle}
                 />

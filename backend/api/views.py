@@ -323,74 +323,134 @@ def ai_parse(request):
 
 
 # ── PDF Parse ──────────────────────────────────────────────
+# backend/api/views.py - Updated pdf_parse view
+
+# backend/api/views.py - Updated pdf_parse with full debugging
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def pdf_parse(request):
+    import PyPDF2
+    import io
+    
+    # ── DEBUG: Log everything ───────────────────────────────
+    print("=" * 60)
+    print("📄 PDF UPLOAD REQUEST RECEIVED")
+    print("=" * 60)
+    print("🔑 User:", request.user)
+    print("📁 request.FILES:", request.FILES)
+    print("📝 request.data:", request.data)
+    print("📋 request.method:", request.method)
+    print("📋 request.content_type:", request.content_type)
+    print("=" * 60)
+    
+    # Check if file exists in request.FILES
     if 'file' not in request.FILES:
+        print("❌ ERROR: 'file' not in request.FILES")
+        print("Available keys:", list(request.FILES.keys()))
         return Response(
-            {"error": "No file uploaded."},
+            {"error": "No file uploaded. Please attach a PDF file."},
             status=status.HTTP_400_BAD_REQUEST
         )
 
     pdf_file = request.FILES['file']
+    print(f"✅ File received: {pdf_file.name}")
+    print(f"📊 File size: {pdf_file.size} bytes")
+    print(f"📋 Content type: {pdf_file.content_type}")
 
+    # Validate file type
     if not pdf_file.name.endswith('.pdf'):
         return Response(
             {"error": "Only PDF files are supported."},
             status=status.HTTP_400_BAD_REQUEST
         )
 
+    # Validate file size (max 10MB)
+    if pdf_file.size > 10 * 1024 * 1024:
+        return Response(
+            {"error": "File too large. Maximum 10MB."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
     try:
-        pdf_reader     = PyPDF2.PdfReader(io.BytesIO(pdf_file.read()))
+        # Read PDF content
+        pdf_content = pdf_file.read()
+        print(f"📖 Read {len(pdf_content)} bytes from PDF")
+        
+        pdf_reader = PyPDF2.PdfReader(io.BytesIO(pdf_content))
+        print(f"📑 PDF has {len(pdf_reader.pages)} pages")
+        
         extracted_text = ""
-        for page in pdf_reader.pages:
-            extracted_text += page.extract_text() + "\n"
+        for i, page in enumerate(pdf_reader.pages):
+            try:
+                page_text = page.extract_text()
+                if page_text:
+                    extracted_text += page_text + "\n"
+                    print(f"✅ Page {i+1}: Extracted {len(page_text)} characters")
+            except Exception as page_err:
+                print(f"⚠️ Page {i+1} extraction error: {page_err}")
+                continue
+        
+        print(f"📝 Total extracted text: {len(extracted_text)} characters")
+        print(f"📝 First 200 chars: {extracted_text[:200]}")
+        
+        if not extracted_text.strip():
+            return Response(
+                {"error": "PDF appears empty or is image-based. Please use text-based PDFs."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Parse with AI
+        from .ai import parse_tasks
+        tasks = parse_tasks(extracted_text)
+        print(f"🤖 AI extracted {len(tasks) if tasks else 0} tasks")
+
+        if not tasks:
+            return Response(
+                {"error": "AI could not find tasks in this PDF. Make sure it contains dates and deadlines."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Clean tasks
+        from .utils import fix_year, weight_to_priority
+        cleaned_tasks = []
+        for t in tasks:
+            if not isinstance(t, dict):
+                continue
+            try:
+                ai_weight = int(t.get("weight", 5))
+                ai_weight = max(1, min(10, ai_weight))
+                priority_label = weight_to_priority(ai_weight)
+
+                deadline = t.get("deadline")
+                if deadline:
+                    deadline = fix_year(deadline)
+                else:
+                    from datetime import datetime, timedelta
+                    deadline = (datetime.now() + timedelta(days=7)).strftime("%Y-%m-%d")
+
+                cleaned_tasks.append({
+                    "title":    t.get("title", "Untitled").strip(),
+                    "deadline": deadline,
+                    "priority": priority_label,
+                    "course":   t.get("course", "General").strip().title()
+                })
+            except Exception as e:
+                print(f"⚠️ Skipping task due to error: {e}")
+                continue
+
+        print(f"✅ Returning {len(cleaned_tasks)} cleaned tasks")
+        print("=" * 60)
+        return Response(cleaned_tasks)
+        
     except Exception as e:
+        print(f"❌ PDF Processing Error: {e}")
+        import traceback
+        traceback.print_exc()
         return Response(
-            {"error": f"Could not read PDF: {str(e)}"},
-            status=status.HTTP_400_BAD_REQUEST
+            {"error": f"Could not process PDF: {str(e)}"},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
-
-    if not extracted_text.strip():
-        return Response(
-            {"error": "PDF appears empty or is image-based."},
-            status=status.HTTP_400_BAD_REQUEST
-        )
-
-    tasks = parse_tasks(extracted_text)
-
-    if not tasks:
-        return Response(
-            {"error": "AI could not find tasks in this PDF."},
-            status=status.HTTP_400_BAD_REQUEST
-        )
-
-    cleaned_tasks = []
-    for t in tasks:
-        if not isinstance(t, dict):
-            continue
-        try:
-            ai_weight = int(t.get("weight", 5))
-            ai_weight = max(1, min(10, ai_weight))
-            priority_label = weight_to_priority(ai_weight)
-
-            deadline = t.get("deadline")
-            if deadline:
-                deadline = fix_year(deadline)
-            else:
-                from datetime import datetime, timedelta
-                deadline = (datetime.now() + timedelta(days=7)).strftime("%Y-%m-%d")
-
-            cleaned_tasks.append({
-                "title":    t.get("title", "Untitled").strip(),
-                "deadline": deadline,
-                "priority": priority_label,
-                "course":   t.get("course", "General").strip().title()
-            })
-        except Exception as e:
-            continue
-
-    return Response(cleaned_tasks)
 
 
 # ── General Roadmap ────────────────────────────────────────
@@ -574,7 +634,7 @@ def _call_groq_for_roadmap(prompt):
 
         client = Groq(api_key=os.getenv("GROQ_API_KEY"))
         response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
+            model="openai/gpt-oss-120b",
             messages=[
                 {
                     "role": "system",

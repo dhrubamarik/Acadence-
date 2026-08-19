@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import API from '../api'
+import SmoothInput from '../components/SmoothInput'
 
 const globalStyles = `
   @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:wght@600&display=swap');
@@ -28,7 +29,7 @@ function Login() {
       navigate("/")
     } catch (err) {
       const data = err.response?.data
-      if (data?.needs_verify) { navigate("/verify", { state: { email } }); return }
+      if (data?.needs_verify) { navigate("/verify", { state: { email, otp: data.debug_otp } }); return }
       setMessage(data?.error || "❌ Login failed.")
       setIsError(true)
     }
@@ -71,7 +72,7 @@ function Login() {
           <form onSubmit={handleSubmit}>
             <div style={{ marginBottom: "18px" }}>
               <label style={labelSt}>Email</label>
-              <input type="email" placeholder="you@college.edu" value={email}
+              <SmoothInput type="email" placeholder="you@college.edu" value={email}
                 onChange={e => setEmail(e.target.value)} required style={inputSt}
                 onFocus={e => e.target.style.borderColor = "#0d9488"}
                 onBlur={e => e.target.style.borderColor = "#c8f0ea"}
@@ -79,7 +80,7 @@ function Login() {
             </div>
             <div style={{ marginBottom: "26px" }}>
               <label style={labelSt}>Password</label>
-              <input type="password" placeholder="Your password" value={password}
+              <SmoothInput type="password" showPasswordToggle placeholder="Your password" value={password}
                 onChange={e => setPassword(e.target.value)} required style={inputSt}
                 onFocus={e => e.target.style.borderColor = "#0d9488"}
                 onBlur={e => e.target.style.borderColor = "#c8f0ea"}

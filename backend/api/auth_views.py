@@ -13,6 +13,12 @@ from .serializers import RegisterSerializer, UserSerializer, DepartmentSerialize
 
 logger = logging.getLogger(__name__)
 
+# ── TEMP: expose OTP directly in API responses until email delivery is
+# fixed in production. Flip this to False (or delete the debug_otp keys
+# below) the moment send_otp_email() is reliably working again — this is
+# a stopgap, not something that should ship long-term.
+DEBUG_EXPOSE_OTP = True
+
 
 # ── Helper: Generate JWT Tokens ────────────────────────────
 def get_tokens_for_user(user):
@@ -96,11 +102,15 @@ def register(request):
     print(f"=== OTP for {user.email}: {otp} ===")
     email_sent = send_otp_email(user.email, otp)
 
-    return Response({
+    response_data = {
         "message": "Registration successful! Check your email for OTP.",
         "email": user.email,
         "email_sent": email_sent
-    }, status=status.HTTP_201_CREATED)
+    }
+    if DEBUG_EXPOSE_OTP:
+        response_data["debug_otp"] = otp
+
+    return Response(response_data, status=status.HTTP_201_CREATED)
 
 
 # ── VERIFY EMAIL ───────────────────────────────────────────
@@ -177,12 +187,16 @@ def login(request):
         print(f"=== RESENT OTP for {user.email}: {otp} ===")
         email_sent = send_otp_email(user.email, otp)
 
-        return Response({
+        response_data = {
             "error": "Email not verified. A new OTP has been sent.",
             "needs_verify": True,
             "email": email,
             "email_sent": email_sent
-        }, status=status.HTTP_403_FORBIDDEN)
+        }
+        if DEBUG_EXPOSE_OTP:
+            response_data["debug_otp"] = otp
+
+        return Response(response_data, status=status.HTTP_403_FORBIDDEN)
 
     tokens = get_tokens_for_user(user)
     return Response({
@@ -222,10 +236,14 @@ def resend_otp(request):
     print(f"=== RESENT OTP for {user.email}: {otp} ===")
     email_sent = send_otp_email(user.email, otp)
 
-    return Response({
+    response_data = {
         "message": "New OTP sent to your email!",
         "email_sent": email_sent
-    })
+    }
+    if DEBUG_EXPOSE_OTP:
+        response_data["debug_otp"] = otp
+
+    return Response(response_data)
 
 
 # ── PROFILE ────────────────────────────────────────────────

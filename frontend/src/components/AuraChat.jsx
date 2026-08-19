@@ -247,6 +247,16 @@ function AuraChat() {
   const removeLoading = () =>
     setMessages(prev => prev.filter(m => m.type !== "loading"))
 
+  const clearChat = () => {
+    if (loading) return
+    setMessages(DEFAULT_MESSAGES)
+    try {
+      sessionStorage.removeItem(STORAGE_KEY)
+    } catch {
+      // storage unavailable — fail silently
+    }
+  }
+
   const handleSend = async (textOverride = null) => {
     const text = (textOverride || input).trim()
     if (!text || loading) return
@@ -326,7 +336,7 @@ function AuraChat() {
           boxShadow: "0 4px 24px rgba(13,148,136,0.10)",
           display: "flex",
           flexDirection: "column",
-          maxHeight: "calc(100vh - 160px)",
+          maxHeight: "calc(100vh - 100px)",
         }}>
           {/* Chat header bar */}
           <div style={{
@@ -341,9 +351,33 @@ function AuraChat() {
               <div style={{ fontFamily: "'Lora', serif", fontSize: "13.5px", fontWeight: 600, color: "#5eead4", letterSpacing: "-0.2px" }}>Acadence-AI Coach</div>
               <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.4)" }}>Ask me to plan, prep, or detect clashes</div>
             </div>
-            <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: "6px" }}>
-              <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#5eead4", boxShadow: "0 0 6px #5eead4" }} />
-              <span style={{ fontSize: "10px", color: "#5eead4", fontWeight: "600" }}>Online</span>
+            <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: "12px" }}>
+              <button
+                onClick={clearChat}
+                disabled={loading}
+                title="Clear chat"
+                style={{
+                  background: "rgba(255,255,255,0.08)",
+                  border: "1px solid rgba(255,255,255,0.15)",
+                  borderRadius: "999px",
+                  padding: "4px 12px",
+                  fontSize: "10.5px",
+                  fontWeight: "600",
+                  color: "rgba(255,255,255,0.75)",
+                  cursor: loading ? "not-allowed" : "pointer",
+                  opacity: loading ? 0.5 : 1,
+                  fontFamily: "'Plus Jakarta Sans', sans-serif",
+                  transition: "all 0.15s",
+                }}
+                onMouseEnter={e => { if (!loading) { e.currentTarget.style.background = "rgba(255,255,255,0.16)"; e.currentTarget.style.color = "#fff" } }}
+                onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.08)"; e.currentTarget.style.color = "rgba(255,255,255,0.75)" }}
+              >
+                🗑️ Clear
+              </button>
+              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#5eead4", boxShadow: "0 0 6px #5eead4" }} />
+                <span style={{ fontSize: "10px", color: "#5eead4", fontWeight: "600" }}>Online</span>
+              </div>
             </div>
           </div>
 
@@ -352,8 +386,8 @@ function AuraChat() {
             ref={scrollContainerRef}
             style={{
               flex: "1 1 auto",
-              minHeight: "200px",
-              maxHeight: "560px",
+              minHeight: "320px",
+              maxHeight: "760px",
               overflowY: "auto",
               overscrollBehavior: "contain",
               padding: "20px",
