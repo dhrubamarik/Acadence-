@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+'''
 set -e
 
 echo "============================================"
@@ -52,6 +53,7 @@ python manage.py shell -c "
 from api.models import Department
 Department.objects.get_or_create(name='Computer Science & Engineering', defaults={'code':'CSSE12','join_key':'csse12key'})
 Department.objects.get_or_create(name='Mechanical Engineering', defaults={'code':'MECH08','join_key':'mech08key'})
+''' 
 Department.objects.get_or_create(name='Business Administration', defaults={'code':'BBA15','join_key':'bba15key'})
 print('Departments ready.')
 "
@@ -59,7 +61,7 @@ echo
 
 # ── Step 6: Frontend deps ────────────────────
 echo "[6/6] Installing frontend dependencies..."
-cd ../frontend
+"cd ../frontend
 npm install
 cd ..
 echo "Done."
