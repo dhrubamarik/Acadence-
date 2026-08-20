@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from './context/AuthContext'
 import API from './api'
-
+import { PanelLeft,LogOut } from "lucide-react"
 import Dashboard from './components/Dashboard'
 import TaskForm from './components/TaskForm'
 import TaskList from './components/TaskList'
@@ -63,8 +63,8 @@ const globalStyles = `
 
   ::-webkit-scrollbar { width: 5px; }
   ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: #99f6e4; border-radius: 99px; }
-  ::-webkit-scrollbar-thumb:hover { background: #5eead4; }
+  ::-webkit-scrollbar-thumb { background: #078b70; border-radius: 99px; }
+  ::-webkit-scrollbar-thumb:hover { background: #055d4f; }
 
   @keyframes fadeSlideIn {
     from { opacity: 0; transform: translateY(12px); }
@@ -298,7 +298,12 @@ function App() {
                 transition: "all 0.15s",
               }}
             >
-              {sidebarOpen ? "◀" : "▶"}
+              <PanelLeft size={18}
+              style={{
+                transition: "transfrom 0.2s ease",
+                transform: sidebarOpen ? "rotate(0deg)" : "rotate(180deg)",
+              }}
+              />
             </button>
           </div>
 
@@ -348,16 +353,6 @@ function App() {
                     <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>
                       {item.label}
                     </span>
-                  )}
-                  {isActive && sidebarOpen && (
-                    <div style={{
-                      marginLeft: "auto",
-                      width: "5px", height: "5px",
-                      borderRadius: "50%",
-                      background: "#5eead4",
-                      flexShrink: 0,
-                      boxShadow: "0 0 6px #5eead4",
-                    }} />
                   )}
                 </button>
               )
@@ -452,7 +447,7 @@ function App() {
                 transition: "all 0.15s",
               }}
             >
-              <span>🚪</span>
+              <LogOut size={16}/>
               {sidebarOpen && "Logout"}
             </button>
           </div>
