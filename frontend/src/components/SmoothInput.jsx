@@ -46,10 +46,13 @@ function SmoothInput({
   const [visible, setVisible] = useState(false)
   const [focused, setFocused] = useState(false)
   const [caretX, setCaretX] = useState(0)
+  const [caretTop, setCaretTop] = useState(0)
+  const [caretHeight, setCaretHeight] = useState(0)
   const [caretShown, setCaretShown] = useState(false)
 
   const actualType = showPasswordToggle ? (visible ? 'text' : 'password') : type
   const isPassword = actualType === 'password'
+  const renderedType = actualType === 'email' ? 'text' : actualType
 
   const inputRef = useRef(null)
   const measureRef = useRef(null)
@@ -67,6 +70,7 @@ function SmoothInput({
     }
     measureSpan.style.font = `${styles.fontStyle} ${styles.fontWeight} ${fontSize} ${styles.fontFamily}`
     measureSpan.style.letterSpacing = styles.letterSpacing
+    measureSpan.style.lineHeight = styles.lineHeight
   }
 
   const measurePrefixWidth = (text) => {
@@ -75,14 +79,16 @@ function SmoothInput({
     if (!input || !measureSpan) return null
     syncMeasureFont()
     measureSpan.textContent = text
-    const paddingLeft = parseFloat(window.getComputedStyle(input).paddingLeft) || 0
-    return text.length > 0 ? measureSpan.offsetWidth + paddingLeft : paddingLeft
+    const inputStyles = window.getComputedStyle(input)
+    const paddingLeft = parseFloat(inputStyles.paddingLeft) || 0
+    const borderLeft = parseFloat(inputStyles.borderLeftWidth) || 0
+    return text.length > 0 ? measureSpan.offsetWidth + paddingLeft + borderLeft : paddingLeft + borderLeft
   }
 
   const updateCaret = (target) => {
     if (!target) return
-    const s = target.selectionStart ?? 0
-    const e = target.selectionEnd ?? 0
+    const s = target.selectionStart ?? target.value.length
+    const e = target.selectionEnd ?? s
     const hasSelection = s !== e
     const caretIndex = target.selectionDirection === 'backward' ? s : e
     const textBeforeCaret = isPassword
@@ -92,7 +98,13 @@ function SmoothInput({
     if (absoluteWidth === null) return
     const paddingRight = parseFloat(window.getComputedStyle(target).paddingRight) || 0
     const maxX = target.clientWidth - paddingRight
+    const inputStyles = window.getComputedStyle(target)
+    const paddingTop = parseFloat(inputStyles.paddingTop) || 0
+    const borderTop = parseFloat(inputStyles.borderTopWidth) || 0
+    const lineHeight = parseFloat(inputStyles.lineHeight) || target.clientHeight - paddingTop - (parseFloat(inputStyles.paddingBottom) || 0) - borderTop - (parseFloat(inputStyles.borderBottomWidth) || 0)
     setCaretX(Math.min(absoluteWidth, maxX))
+    setCaretTop(borderTop + paddingTop)
+    setCaretHeight(lineHeight)
     setCaretShown(!hasSelection)
   }
 
@@ -121,7 +133,8 @@ function SmoothInput({
       <input
         {...props}
         ref={inputRef}
-        type={actualType}
+        type={renderedType}
+        inputMode={actualType === 'email' ? 'email' : props.inputMode}
         value={value}
         onChange={(e) => {
           onChange?.(e)
@@ -155,14 +168,14 @@ function SmoothInput({
         aria-hidden
         style={{
           position: 'absolute',
-          top: '50%',
+          top: `${caretTop}px`,
           left: 0,
-          height: '55%',
+          height: `${caretHeight}px`,
           width: '2px',
           borderRadius: '2px',
           background: '#0d9488',
           pointerEvents: 'none',
-          transform: `translate(${caretX}px, -50%)`,
+          transform: `translateX(${caretX}px)`,
           transition: 'transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.15s ease',
           opacity: focused && caretShown ? 1 : 0,
         }}

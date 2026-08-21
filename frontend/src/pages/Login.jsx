@@ -131,7 +131,7 @@ const labelSt = {
 const inputSt = {
   width: "100%", padding: "11px 14px",
   border: "1.5px solid #c8f0ea", borderRadius: "10px",
-  fontSize: "13.5px", outline: "none", boxSizing: "border-box",
+  fontSize: "13.5px", lineHeight: "1.4", outline: "none", boxSizing: "border-box",
   fontFamily: "'Plus Jakarta Sans', sans-serif",
   background: "#f8fffe", color: "#0f2a27", transition: "border-color 0.15s",
 }
