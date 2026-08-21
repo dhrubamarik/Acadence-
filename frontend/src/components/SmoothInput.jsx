@@ -1,5 +1,12 @@
 // src/components/SmoothInput.jsx
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+
+// Dot character used to measure password-masked text width (matches native
+// browser rendering closely enough for caret positioning purposes).
+const PASSWORD_CHAR =
+  typeof navigator !== 'undefined' && navigator.userAgent.match(/firefox|fxios/i)
+    ? '\u25CF'
+    : '\u2022'
 
 const EyeIcon = (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -16,8 +23,10 @@ const EyeOffIcon = (
 )
 
 /**
- * Drop-in replacement for <input> with an optional password visibility
- * toggle.
+ * Drop-in replacement for <input>. Renders a thin teal caret that glides
+ * smoothly (spring-ish ease) to the cursor position instead of the native
+ * blinking caret, and — when showPasswordToggle is set — an eye button
+ * that toggles between masked and plain text.
  *
  * Accepts the same props as a normal <input> (value, onChange, onFocus,
  * onBlur, name, placeholder, required, style, ...) so it can swap in for
@@ -35,22 +44,127 @@ function SmoothInput({
   ...props
 }) {
   const [visible, setVisible] = useState(false)
+  const [focused, setFocused] = useState(false)
+  const [caretX, setCaretX] = useState(0)
+  const [caretShown, setCaretShown] = useState(false)
 
   const actualType = showPasswordToggle ? (visible ? 'text' : 'password') : type
+  const isPassword = actualType === 'password'
+
+  const inputRef = useRef(null)
+  const measureRef = useRef(null)
+
+  const syncMeasureFont = () => {
+    const input = inputRef.current
+    const measureSpan = measureRef.current
+    if (!input || !measureSpan) return
+    const styles = window.getComputedStyle(input)
+    let fontSize = styles.fontSize
+    if (isPassword && !/chrome|chromium|crios/i.test(navigator.userAgent)) {
+      // dot glyphs render slightly larger than the font-size box in most
+      // non-Chromium engines — nudge measurement to compensate
+      fontSize = `${parseFloat(fontSize) + 6}px`
+    }
+    measureSpan.style.font = `${styles.fontStyle} ${styles.fontWeight} ${fontSize} ${styles.fontFamily}`
+    measureSpan.style.letterSpacing = styles.letterSpacing
+  }
+
+  const measurePrefixWidth = (text) => {
+    const input = inputRef.current
+    const measureSpan = measureRef.current
+    if (!input || !measureSpan) return null
+    syncMeasureFont()
+    measureSpan.textContent = text
+    const paddingLeft = parseFloat(window.getComputedStyle(input).paddingLeft) || 0
+    return text.length > 0 ? measureSpan.offsetWidth + paddingLeft : paddingLeft
+  }
+
+  const updateCaret = (target) => {
+    if (!target) return
+    const s = target.selectionStart ?? 0
+    const e = target.selectionEnd ?? 0
+    const hasSelection = s !== e
+    const caretIndex = target.selectionDirection === 'backward' ? s : e
+    const textBeforeCaret = isPassword
+      ? PASSWORD_CHAR.repeat(caretIndex)
+      : target.value.slice(0, caretIndex)
+    const absoluteWidth = measurePrefixWidth(textBeforeCaret)
+    if (absoluteWidth === null) return
+    const paddingRight = parseFloat(window.getComputedStyle(target).paddingRight) || 0
+    const maxX = target.clientWidth - paddingRight
+    setCaretX(Math.min(absoluteWidth, maxX))
+    setCaretShown(!hasSelection)
+  }
+
+  useEffect(() => {
+    const input = inputRef.current
+    if (input && document.activeElement === input) updateCaret(input)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value, actualType])
+
+  useEffect(() => {
+    const input = inputRef.current
+    if (!input) return
+    const onSelectionChange = () => {
+      if (document.activeElement !== input) return
+      requestAnimationFrame(() => {
+        if (document.activeElement === input) updateCaret(input)
+      })
+    }
+    document.addEventListener('selectionchange', onSelectionChange)
+    return () => document.removeEventListener('selectionchange', onSelectionChange)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return (
     <div style={{ position: 'relative', width: '100%', ...wrapperStyle }}>
       <input
         {...props}
+        ref={inputRef}
         type={actualType}
         value={value}
-        onChange={onChange}
-        onFocus={onFocus}
-        onBlur={onBlur}
+        onChange={(e) => {
+          onChange?.(e)
+          requestAnimationFrame(() => updateCaret(e.target))
+        }}
+        onFocus={(e) => {
+          setFocused(true)
+          updateCaret(e.target)
+          onFocus?.(e)
+        }}
+        onBlur={(e) => {
+          setFocused(false)
+          onBlur?.(e)
+        }}
         style={{
           ...style,
-          caretColor: '#0d9488',
+          caretColor: 'transparent',
           paddingRight: showPasswordToggle ? '42px' : style.paddingRight,
+        }}
+      />
+
+      {/* hidden span used only to measure text width for caret placement */}
+      <span
+        ref={measureRef}
+        aria-hidden
+        style={{ position: 'absolute', top: 0, left: 0, visibility: 'hidden', whiteSpace: 'pre', pointerEvents: 'none' }}
+      />
+
+      {/* the animated caret itself */}
+      <div
+        aria-hidden
+        style={{
+          position: 'absolute',
+          top: '50%',
+          left: 0,
+          height: '55%',
+          width: '2px',
+          borderRadius: '2px',
+          background: '#0d9488',
+          pointerEvents: 'none',
+          transform: `translate(${caretX}px, -50%)`,
+          transition: 'transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.15s ease',
+          opacity: focused && caretShown ? 1 : 0,
         }}
       />
 
