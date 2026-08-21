@@ -157,7 +157,7 @@ function SmoothInput({
           position: 'absolute',
           top: '50%',
           left: 0,
-          height: '55%',
+          height: '38%',
           width: '2px',
           borderRadius: '2px',
           background: '#0d9488',
