@@ -154,10 +154,10 @@ function CalendarView() {
       {/* Header */}
       <div style={{ marginBottom: "26px" }}>
         <h1 style={{ fontFamily: "'Lora',serif", margin: "0 0 5px", fontSize: "28px", fontWeight: 600, color: "#0f2a27" }}>
-          📅 LMS Calendar
+        LMS Calendar
         </h1>
         <p style={{ color: "#7aada5", margin: 0, fontSize: "13.5px" }}>Your complete semester at a glance</p>
-        <div style={{ marginTop: "12px", height: "2px", width: "60px", background: "linear-gradient(90deg,#0d9488,transparent)", borderRadius: "99px" }} />
+        <div style={{ /*marginTop: "12px", height: "2px", width: "60px", background: "linear-gradient(90deg,#0d9488,transparent)", borderRadius: "99px" */}} />
       </div>
 
       {/* Stats */}

@@ -144,7 +144,7 @@ function DepartmentFiles() {
             marginBottom: "6px",
           }}>
             <div style={{
-              width:          "42px",
+              /*width:          "42px",
               height:         "42px",
               borderRadius:   "12px",
               background:     "linear-gradient(135deg, #0d9488, #14b8a6)",
@@ -152,9 +152,9 @@ function DepartmentFiles() {
               alignItems:     "center",
               justifyContent: "center",
               fontSize:       "22px",
-              boxShadow:      "0 4px 14px rgba(13,148,136,0.3)",
+              boxShadow:      "0 4px 14px rgba(13,148,136,0.3)",*/
             }}>
-              📁
+              
             </div>
             <div>
               <h2 style={{
@@ -173,11 +173,11 @@ function DepartmentFiles() {
             </div>
           </div>
           <div style={{
-            height:       "2px",
+            /*height:       "2px",
             width:        "80px",
             background:   "linear-gradient(90deg, #0d9488, transparent)",
             borderRadius: "99px",
-            marginTop:    "10px",
+            marginTop:    "10px",*/
           }} />
         </div>
 

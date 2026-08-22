@@ -1,5 +1,6 @@
 # api/urls.py - complete updated file
 from django.urls import path
+from rest_framework_simplejwt.views import TokenRefreshView
 from . import views
 from . import auth_views
 
@@ -38,4 +39,5 @@ urlpatterns = [
     path('auth/profile/',              auth_views.profile),
     path('auth/departments/',          auth_views.list_departments),
     path('auth/resend-otp/',           auth_views.resend_otp),
+    path('token/refresh/',             TokenRefreshView.as_view(), name='token_refresh'),
 ]

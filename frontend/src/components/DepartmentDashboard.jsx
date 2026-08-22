@@ -158,7 +158,7 @@ function DepartmentDashboard() {
       <div style={{ marginBottom: "28px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
           <div style={{
-            width:          "42px",
+            /*width:          "42px",
             height:         "42px",
             borderRadius:   "12px",
             background:     "linear-gradient(135deg, #0d9488, #14b8a6)",
@@ -166,9 +166,9 @@ function DepartmentDashboard() {
             alignItems:     "center",
             justifyContent: "center",
             fontSize:       "22px",
-            boxShadow:      "0 4px 14px rgba(13,148,136,0.3)",
+            boxShadow:      "0 4px 14px rgba(13,148,136,0.3)",*/
           }}>
-            🏫
+            
           </div>
           <div>
             <h1 style={{
@@ -202,11 +202,11 @@ function DepartmentDashboard() {
           </div>
         </div>
         <div style={{
-          marginTop:    "14px",
+          /*marginTop:    "14px",
           height:       "2px",
           width:        "80px",
           background:   "linear-gradient(90deg, #0d9488, transparent)",
-          borderRadius: "99px",
+          borderRadius: "99px",*/
         }} />
       </div>
 

@@ -470,7 +470,7 @@ function App() {
 
             {activePage === "ai" && (
               <div>
-                <PageHeader icon="🤖" title="AI Task Generator" sub="Paste syllabus text and let AI extract all deadlines" />
+                <PageHeader /*icon="🤖"*/ title="AI Task Generator" sub="Paste syllabus text and let AI extract all deadlines" />
                 <AIGenerator onTasksGenerated={refreshAll} />
                 <TaskForm fetchTasks={fetchTasks} fetchAnalytics={fetchAnalytics} />
               </div>
@@ -478,21 +478,21 @@ function App() {
 
             {activePage === "pdf" && (
               <div>
-                <PageHeader icon="📄" title="PDF Syllabus Upload" sub="Upload your syllabus PDF and AI will extract all tasks" />
+                <PageHeader /*icon="📄"*/ title="PDF Syllabus Upload" sub="Upload your syllabus PDF and AI will extract all tasks" />
                 <PDFUpload onTasksGenerated={refreshAll} />
               </div>
             )}
 
             {activePage === "tasks" && (
               <div>
-                <PageHeader icon="📋" title="My Tasks" sub="All your tasks across all subjects" />
+                <PageHeader /*icon="📋"*/ title="My Tasks" sub="All your tasks across all subjects" />
                 <TaskList tasks={tasks} onDelete={refreshAll} />
               </div>
             )}
 
             {activePage === "roadmap" && (
               <div>
-                <PageHeader icon="🗺️" title="AI Study Roadmap" sub="Chat with Aura to get personalized study plans" />
+                <PageHeader /*icon="🗺️"*/ title="AI Study Roadmap" sub="Chat with Aura to get personalized study plans" />
                 <AuraChat />
               </div>
             )}
@@ -501,7 +501,7 @@ function App() {
 
             {activePage === "stress" && (
               <div>
-                <PageHeader icon="🌡️" title="Stress Weather Map" sub="Your workload intensity across the semester" />
+                <PageHeader /*icon="🌡️"*/ title="Stress Weather Map" sub="Your workload intensity across the semester" />
                 <StressWeather stress={analytics.stress}
                   isPersonalized={userInsights?.tasks_completed >= 3}
                   tasks={tasks}
@@ -511,7 +511,7 @@ function App() {
 
             {activePage === "clashes" && (
               <div>
-                <PageHeader icon="⚡" title="Deadline Clashes" sub="High priority tasks dangerously close together" />
+                <PageHeader /*icon="⚡"*/ title="Deadline Clashes" sub="High priority tasks dangerously close together" />
                 <Clashes clashes={analytics.clashes} />
               </div>
             )}
@@ -535,12 +535,12 @@ function PageHeader({ icon, title, sub }) {
     <div style={{ marginBottom: "28px" }}>
       <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "4px" }}>
         <div style={{
-          width: "40px", height: "40px",
+          /*width: "40px", height: "40px",
           borderRadius: "11px",
-          background: "linear-gradient(135deg, #0d9488, #06b6d4)",
-          display: "flex", alignItems: "center", justifyContent: "center",
+          /*background: "linear-gradient(135deg, #0d9488, #06b6d4)",*/
+          /*display: "flex", alignItems: "center", justifyContent: "center",
           fontSize: "20px",
-          boxShadow: "0 4px 16px rgba(13,148,136,0.3)",
+          /*boxShadow: "0 4px 16px rgba(13,148,136,0.3)",*/
         }}>
           {icon}
         </div>
@@ -555,7 +555,7 @@ function PageHeader({ icon, title, sub }) {
         </h2>
       </div>
       <p style={{
-        marginLeft: "52px",
+        marginLeft: "13px",
         color: "#5e8b83",
         fontSize: "13.5px",
       }}>
